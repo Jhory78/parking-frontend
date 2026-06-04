@@ -1,0 +1,24 @@
+<div class="dashboard">
+  <h2>Dashboard</h2>
+
+  <div class="stats" *ngIf="!loading">
+    <div class="stat available">
+      <span class="num">{{ available }}</span>
+      <span class="label">Disponibles</span>
+    </div>
+    <div class="stat occupied">
+      <span class="num">{{ occupied }}</span>
+      <span class="label">Ocupados</span>
+    </div>
+    <div class="stat reserved">
+      <span class="num">{{ reserved }}</span>
+      <span class="label">Reservados</span>
+    </div>
+    <div class="stat total">
+      <span class="num">{{ slots.length }}</span>
+      <span class="label">Total</span>
+    </div>
+  </div>
+
+  <p *ngIf="loading" class="loading">Cargando datos...</p>
+</div>

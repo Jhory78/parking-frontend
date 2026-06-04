@@ -1,0 +1,24 @@
+<div class="parking-page">
+  <h2>Estacionamiento</h2>
+
+  <p *ngIf="loading" class="loading">Cargando espacios...</p>
+
+  <div class="grid" *ngIf="!loading">
+    <div
+      *ngFor="let slot of slots"
+      class="slot"
+      [ngClass]="getStatusClass(slot.status)"
+    >
+      <span class="code">{{ slot.code }}</span>
+      <span class="status-label">{{ slot.status }}</span>
+      <span class="plate" *ngIf="slot.vehiclePlate">{{ slot.vehiclePlate }}</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="dot available"></span> Disponible
+    <span class="dot occupied"></span> Ocupado
+    <span class="dot reserved"></span> Reservado
+    <span class="dot maintenance"></span> Mantenimiento
+  </div>
+</div>

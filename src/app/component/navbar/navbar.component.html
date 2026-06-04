@@ -1,0 +1,12 @@
+<nav class="navbar">
+  <div class="brand">
+    <span class="icon">🅿</span>
+    <span>ParkingSystem</span>
+  </div>
+  <div class="actions">
+    <span class="user" *ngIf="currentUser.user()">
+      {{ currentUser.user()?.given_name }} {{ currentUser.user()?.family_name }}
+    </span>
+    <button (click)="logout()" class="logout-btn">Salir</button>
+  </div>
+</nav>

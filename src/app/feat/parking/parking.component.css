@@ -1,0 +1,26 @@
+.parking-page { padding: 2rem; }
+h2 { color: #f1f5f9; margin-bottom: 1.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
+.slot {
+  border: 2px solid #334155;
+  border-radius: 10px;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  cursor: default;
+  transition: transform 0.15s;
+}
+.slot:hover { transform: scale(1.04); }
+.slot.available  { border-color: #4ade80; background: rgba(74,222,128,0.08); }
+.slot.occupied   { border-color: #f87171; background: rgba(248,113,113,0.08); }
+.slot.reserved   { border-color: #fbbf24; background: rgba(251,191,36,0.08); }
+.slot.maintenance{ border-color: #94a3b8; background: rgba(148,163,184,0.08); }
+.code { display: block; color: #f1f5f9; font-weight: 700; font-size: 1.1rem; }
+.status-label { display: block; font-size: 0.65rem; color: #64748b; text-transform: uppercase; margin-top: 0.25rem; }
+.plate { display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; }
+.legend { display: flex; align-items: center; gap: 1.25rem; color: #64748b; font-size: 0.85rem; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+.dot.available  { background: #4ade80; }
+.dot.occupied   { background: #f87171; }
+.dot.reserved   { background: #fbbf24; }
+.dot.maintenance{ background: #94a3b8; }
+.loading { color: #64748b; }

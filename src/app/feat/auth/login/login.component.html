@@ -1,0 +1,45 @@
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Parking System</h1>
+        <h2>Iniciar sesión</h2>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="field">
+                <label>Email</label>
+                <input
+                        type="email"
+                        formControlName="email"
+                        placeholder="usuario@email.com"
+                        [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                />
+                <span class="hint" *ngIf="form.get('email')?.hasError('required') && form.get('email')?.touched">
+          El email es requerido
+        </span>
+                <span class="hint" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">
+          Ingresa un email válido
+        </span>
+            </div>
+
+            <div class="field">
+                <label>Contraseña</label>
+                <input
+                        type="password"
+                        formControlName="password"
+                        placeholder="••••••••"
+                        [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                />
+                <span class="hint" *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched">
+          La contraseña es requerida
+        </span>
+            </div>
+
+            <p class="error" *ngIf="error">{{ error }}</p>
+
+            <button type="submit" [disabled]="loading || form.invalid">
+                {{ loading ? 'Ingresando...' : 'Ingresar' }}
+            </button>
+        </form>
+
+        <p class="link">¿No tienes cuenta? <a routerLink="/auth/register">Regístrate</a></p>
+    </div>
+</div>

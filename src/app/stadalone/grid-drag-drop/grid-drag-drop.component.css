@@ -1,0 +1,25 @@
+.grid-container {
+  display: grid;
+  gap: 4px;
+}
+.cell {
+  min-height: 60px;
+  background: rgba(51,65,85,0.4);
+  border: 1px dashed #334155;
+  border-radius: 6px;
+}
+.item {
+  height: 100%;
+  min-height: 58px;
+  background: #1e40af;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  cursor: grab;
+  padding: 4px;
+  text-align: center;
+}
+.item:active { cursor: grabbing; }

@@ -1,0 +1,17 @@
+<div class="grid-container" [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'">
+  <div
+    *ngFor="let cell of getCells()"
+    class="cell"
+    (dragover)="onDragOver($event)"
+    (drop)="onDrop(cell.col, cell.row)"
+  >
+    <div
+      *ngIf="getItemAt(cell.col, cell.row) as item"
+      class="item"
+      draggable="true"
+      (dragstart)="onDragStart(item)"
+    >
+      {{ item.label }}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Parking System</h1>
+        <h2>Crear cuenta</h2>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="row">
+                <div class="field">
+                    <label>Nombre</label>
+                    <input
+                            type="text"
+                            formControlName="firstName"
+                            placeholder="Juan"
+                            [class.invalid]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
+                    />
+                    <span class="hint" *ngIf="form.get('firstName')?.hasError('required') && form.get('firstName')?.touched">
+            El nombre es requerido
+          </span>
+                </div>
+                <div class="field">
+                    <label>Apellido</label>
+                    <input
+                            type="text"
+                            formControlName="lastName"
+                            placeholder="Pérez"
+                            [class.invalid]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
+                    />
+                    <span class="hint" *ngIf="form.get('lastName')?.hasError('required') && form.get('lastName')?.touched">
+            El apellido es requerido
+          </span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <input
+                        type="email"
+                        formControlName="email"
+                        placeholder="usuario@email.com"
+                        [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                />
+                <span class="hint" *ngIf="form.get('email')?.hasError('required') && form.get('email')?.touched">
+          El email es requerido
+        </span>
+                <span class="hint" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">
+          Ingresa un email válido
+        </span>
+            </div>
+                
+
+            <div class="field">
+                <label>Contraseña</label>
+                <input
+                        type="password"
+                        formControlName="password"
+                        placeholder="Mínimo 8 caracteres"
+                        [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                />
+                <span class="hint" *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched">
+          La contraseña es requerida
+        </span>
+                <span class="hint" *ngIf="form.get('password')?.hasError('minlength') && form.get('password')?.touched">
+          Mínimo 8 caracteres (llevas {{ form.get('password')?.value?.length || 0 }})
+        </span>
+            </div>
+
+            <p class="error"   *ngIf="error">{{ error }}</p>
+            <p class="success" *ngIf="success">{{ success }}</p>
+
+            <button type="submit" [disabled]="loading || form.invalid">
+                {{ loading ? 'Registrando...' : 'Crear cuenta' }}
+            </button>
+        </form>
+
+        <p class="link">¿Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesión</a></p>
+    </div>
+</div>
