@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { LoginRequest } from '../../../models/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +14,7 @@ import { AuthService } from '../../../services/auth.service';
 })
 export class LoginComponent {
   form = this.fb.group({
-    email:    ['', [Validators.required, Validators.email]],
+    correo:  ['', [Validators.required, Validators.email]],
     password: ['', Validators.required]
   });
   loading = false;
@@ -22,16 +23,26 @@ export class LoginComponent {
   constructor(
       private fb: FormBuilder,
       private authService: AuthService,
-      private router: Router
+      private router: Router,
+      private route: ActivatedRoute
   ) {}
 
   submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     this.loading = true;
     this.error = '';
 
-    this.authService.login(this.form.value as any).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+    const body = this.form.getRawValue() as LoginRequest;
+    this.authService.login(body).subscribe({
+      next: () => {
+        const returnUrl =
+          this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+        void this.router.navigateByUrl(returnUrl);
+      },
       error: (err) => {
         this.error = err.error?.message ?? 'Credenciales inválidas';
         this.loading = false;

@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { AuthUser } from '../../models/auth.model';
+import { AuthUser, RolUsuario } from '../../models/auth.model';
 import { decodeJwt } from '../../utils/jwt.utils';
 import { TokenStorageService } from '../security/token-storage.service';
 
@@ -13,13 +13,21 @@ export class CurrentUserService {
 
   loadFromStorage(): void {
     const token = this.tokenService.getAccessToken();
-    if (token) {
-      this.user.set(decodeJwt(token));
-    }
+    this.user.set(token ? decodeJwt(token) : null);
   }
 
-  hasRole(role: string): boolean {
-    return this.user()?.realm_access?.roles?.includes(role) ?? false;
+  hasRole(role: RolUsuario): boolean {
+    const user = this.user();
+    if (!user) return false;
+
+    const roles = [
+      user.rol,
+      user.role,
+      ...(user.roles ?? []),
+      ...(user.authorities ?? []).map(authority => authority.replace(/^ROLE_/, ''))
+    ];
+
+    return roles.includes(role);
   }
 
   clear(): void {

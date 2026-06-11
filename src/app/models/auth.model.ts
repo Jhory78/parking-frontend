@@ -1,28 +1,57 @@
+export type RolUsuario = 'ADMIN' | 'OPERARIO';
+export type EstadoUsuario = 'ACTIVO' | 'INACTIVO';
+
 export interface LoginRequest {
-  email: string;
+  correo: string;
   password: string;
 }
 
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
 }
 
-export interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  refresh_expires_in: number;
-  token_type: string;
-  session_state: string;
+export interface UsuarioRequest {
+  nombre: string;
+  correo: string;
+  password: string;
+  rol: RolUsuario;
+}
+
+export interface UsuarioResponse {
+  id: number;
+  nombre: string;
+  correo: string;
+  rol: RolUsuario;
+  estado: EstadoUsuario;
+}
+
+export interface ActualizarUsuarioRequest {
+  nombre: string;
+  correo: string;
+  estado: EstadoUsuario;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface ApiError {
+  code: number;
+  message: string;
+  errors: string[];
 }
 
 export interface AuthUser {
-  sub: string;
-  email: string;
-  given_name: string;
-  family_name: string;
-  realm_access?: { roles: string[] };
+  sub?: string;
+  id?: number;
+  nombre?: string;
+  correo?: string;
+  rol?: RolUsuario;
+  role?: RolUsuario;
+  roles?: RolUsuario[];
+  authorities?: string[];
+  exp?: number;
 }

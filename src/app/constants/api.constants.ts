@@ -8,3 +8,5 @@ export const AUTH_ENDPOINTS = {
   refresh:  `${API_BASE}/auth/refresh`,
   logout:   `${API_BASE}/auth/logout`,
 };
+
+export const USUARIOS_ENDPOINT = `${API_BASE}/usuarios`;

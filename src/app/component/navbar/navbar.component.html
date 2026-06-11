@@ -5,7 +5,7 @@
   </div>
   <div class="actions">
     <span class="user" *ngIf="currentUser.user()">
-      {{ currentUser.user()?.given_name }} {{ currentUser.user()?.family_name }}
+      {{ currentUser.user()?.nombre || currentUser.user()?.correo }}
     </span>
     <button (click)="logout()" class="logout-btn">Salir</button>
   </div>

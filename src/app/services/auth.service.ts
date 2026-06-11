@@ -1,14 +1,31 @@
-  import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { LoginRequest, RegisterRequest, TokenResponse } from '../models/auth.model';
+import {
+  Observable,
+  catchError,
+  finalize,
+  map,
+  of,
+  shareReplay,
+  tap,
+  throwError
+} from 'rxjs';
 import { AUTH_ENDPOINTS } from '../constants/api.constants';
-import { TokenStorageService } from '../core/security/token-storage.service';
 import { CurrentUserService } from '../core/users/current-user.service';
+import { TokenStorageService } from '../core/security/token-storage.service';
+import {
+  LoginRequest,
+  LoginResponse,
+  RefreshTokenRequest,
+  UsuarioRequest,
+  UsuarioResponse
+} from '../models/auth.model';
+import { isTokenExpired } from '../utils/jwt.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private refreshRequest$: Observable<LoginResponse> | null = null;
 
   constructor(
     private http: HttpClient,
@@ -17,43 +34,76 @@ export class AuthService {
     private router: Router
   ) {}
 
-  login(body: LoginRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(AUTH_ENDPOINTS.login, body).pipe(
-      tap(res => {
-        this.tokenStorage.saveTokens(res.access_token, res.refresh_token);
-        this.currentUser.loadFromStorage();
+  register(body: UsuarioRequest): Observable<UsuarioResponse> {
+    return this.http.post<UsuarioResponse>(AUTH_ENDPOINTS.register, body);
+  }
+
+  login(body: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(AUTH_ENDPOINTS.login, body).pipe(
+      tap(response => this.saveSession(response))
+    );
+  }
+
+  refresh(): Observable<LoginResponse> {
+    if (this.refreshRequest$) {
+      return this.refreshRequest$;
+    }
+
+    const refreshToken = this.tokenStorage.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new Error('No hay refresh token disponible'));
+    }
+
+    const body: RefreshTokenRequest = { refreshToken };
+    this.refreshRequest$ = this.http
+      .post<LoginResponse>(AUTH_ENDPOINTS.refresh, body)
+      .pipe(
+        tap(response => this.saveSession(response)),
+        finalize(() => {
+          this.refreshRequest$ = null;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
+      );
+
+    return this.refreshRequest$;
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(AUTH_ENDPOINTS.logout, null).pipe(
+      catchError(() => of(void 0)),
+      finalize(() => this.clearSession())
+    );
+  }
+
+  ensureValidSession(): Observable<boolean> {
+    const accessToken = this.tokenStorage.getAccessToken();
+    if (accessToken && !isTokenExpired(accessToken)) {
+      return of(true);
+    }
+
+    return this.refresh().pipe(
+      map(() => true),
+      catchError(() => {
+        this.clearSession(false);
+        return of(false);
       })
     );
   }
 
-  register(body: RegisterRequest): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(AUTH_ENDPOINTS.register, body);
-  }
-
-  refresh(): Observable<TokenResponse> {
-    const refreshToken = this.tokenStorage.getRefreshToken() ?? '';
-    const params = new HttpParams().set('refreshToken', refreshToken);
-    return this.http.post<TokenResponse>(AUTH_ENDPOINTS.refresh, null, { params }).pipe(
-      tap(res => this.tokenStorage.saveTokens(res.access_token, res.refresh_token))
-    );
-  }
-
-  logout(): void {
-    const refreshToken = this.tokenStorage.getRefreshToken() ?? '';
-    const params = new HttpParams().set('refreshToken', refreshToken);
-    this.http.post(AUTH_ENDPOINTS.logout, null, { params }).subscribe({
-      complete: () => this._clearAndRedirect(),
-      error:    () => this._clearAndRedirect()
-    });
-  }
-
-  private _clearAndRedirect(): void {
+  clearSession(redirect = true): void {
     this.tokenStorage.clearTokens();
     this.currentUser.clear();
-    this.router.navigate(['/auth/login']);
+    if (redirect) {
+      void this.router.navigate(['/auth/login']);
+    }
   }
 
   isLoggedIn(): boolean {
     return !!this.tokenStorage.getAccessToken();
+  }
+
+  private saveSession(response: LoginResponse): void {
+    this.tokenStorage.saveTokens(response.accessToken, response.refreshToken);
+    this.currentUser.loadFromStorage();
   }
 }

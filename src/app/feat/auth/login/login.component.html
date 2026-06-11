@@ -5,18 +5,18 @@
 
         <form [formGroup]="form" (ngSubmit)="submit()">
             <div class="field">
-                <label>Email</label>
+                <label>Correo</label>
                 <input
                         type="email"
-                        formControlName="email"
+                        formControlName="correo"
                         placeholder="usuario@email.com"
-                        [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                        [class.invalid]="form.get('correo')?.invalid && form.get('correo')?.touched"
                 />
-                <span class="hint" *ngIf="form.get('email')?.hasError('required') && form.get('email')?.touched">
-          El email es requerido
+                <span class="hint" *ngIf="form.get('correo')?.hasError('required') && form.get('correo')?.touched">
+          El correo es requerido
         </span>
-                <span class="hint" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">
-          Ingresa un email válido
+                <span class="hint" *ngIf="form.get('correo')?.hasError('email') && form.get('correo')?.touched">
+          Ingresa un correo válido
         </span>
             </div>
 
