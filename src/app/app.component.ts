@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { SidebarComponent } from './component/sidebar/sidebar.component';
+import { OccupancyAlertComponent } from './component/occupancy-alert/occupancy-alert.component';
 import { AuthService } from './services/auth.service';
 import { AuthorizationFeedbackService } from './core/security/authorization-feedback.service';
+import { CurrentUserService } from './core/users/current-user.service';
+import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent, OccupancyAlertComponent],
   template: `
     <div
       class="permission-message"
@@ -24,6 +27,7 @@ import { AuthorizationFeedbackService } from './core/security/authorization-feed
       <div class="layout">
         <app-sidebar></app-sidebar>
         <main class="content">
+          <app-occupancy-alert></app-occupancy-alert>
           <router-outlet></router-outlet>
         </main>
       </div>
@@ -33,35 +37,54 @@ import { AuthorizationFeedbackService } from './core/security/authorization-feed
     </ng-template>
   `,
   styles: [`
-    .layout { display: flex; }
-    .content { flex: 1; background: #0f172a; min-height: calc(100vh - 60px); }
+    .layout { display: flex; align-items: flex-start; }
+    .content { flex: 1; min-width: 0; min-height: calc(100vh - 72px); }
     .permission-message {
       position: fixed;
-      top: 16px;
-      right: 16px;
+      top: 88px;
+      right: 24px;
       z-index: 1000;
       display: flex;
       gap: 16px;
       align-items: center;
       max-width: 420px;
-      padding: 12px 16px;
-      border: 1px solid #f59e0b;
-      border-radius: 8px;
-      color: #fef3c7;
-      background: #78350f;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+      padding: 14px 20px;
+      border: 1px solid var(--pk-secondary);
+      border-radius: var(--pk-radius-pill);
+      color: var(--pk-secondary);
+      background: var(--pk-surface-high);
+      box-shadow: var(--pk-shadow-lg);
     }
+    .permission-message span { font-size: .9rem; font-weight: 500; }
     .permission-message button {
       border: 0;
-      color: inherit;
+      padding: 0;
+      color: var(--pk-ink-muted);
       background: transparent;
+      font-family: inherit;
+      font-size: .85rem;
       cursor: pointer;
+    }
+    @media (max-width: 860px) {
+      .layout { flex-direction: column; }
+      .content { width: 100%; }
     }
   `]
 })
 export class AppComponent {
   constructor(
     public authService: AuthService,
-    public authorizationFeedback: AuthorizationFeedbackService
-  ) {}
+    public authorizationFeedback: AuthorizationFeedbackService,
+    currentUser: CurrentUserService,
+    occupancyStream: OccupancyStreamService
+  ) {
+    // Una sola conexión en tiempo real mientras haya sesión (RF-16, RF-20)
+    effect(() => {
+      if (currentUser.id() !== null) {
+        occupancyStream.start();
+      } else {
+        occupancyStream.stop();
+      }
+    }, { allowSignalWrites: true });
+  }
 }

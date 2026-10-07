@@ -8,8 +8,7 @@ import {
   map,
   of,
   shareReplay,
-  tap,
-  throwError
+  tap
 } from 'rxjs';
 import { AUTH_ENDPOINTS } from '../constants/api.constants';
 import { CurrentUserService } from '../core/users/current-user.service';
@@ -17,15 +16,13 @@ import { TokenStorageService } from '../core/security/token-storage.service';
 import {
   LoginRequest,
   LoginResponse,
-  RefreshTokenRequest,
-  UsuarioRequest,
-  UsuarioResponse
+  UserResponse
 } from '../models/auth.model';
 import { isTokenExpired } from '../utils/jwt.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private refreshRequest$: Observable<LoginResponse> | null = null;
+  private meRequest$: Observable<UserResponse> | null = null;
 
   constructor(
     private http: HttpClient,
@@ -34,40 +31,36 @@ export class AuthService {
     private router: Router
   ) {}
 
-  register(body: UsuarioRequest): Observable<UsuarioResponse> {
-    return this.http.post<UsuarioResponse>(AUTH_ENDPOINTS.register, body);
-  }
-
   login(body: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(AUTH_ENDPOINTS.login, body).pipe(
-      tap(response => this.saveSession(response))
+      tap(response => {
+        this.tokenStorage.saveToken(response.accessToken);
+        this.currentUser.loadFromStorage();
+      })
     );
   }
 
-  refresh(): Observable<LoginResponse> {
-    if (this.refreshRequest$) {
-      return this.refreshRequest$;
+  /**
+   * Usuario en sesión según el backend. Un 401 aquí significa token
+   * expirado o cuenta desactivada.
+   */
+  me(): Observable<UserResponse> {
+    if (this.meRequest$) {
+      return this.meRequest$;
     }
 
-    const refreshToken = this.tokenStorage.getRefreshToken();
-    if (!refreshToken) {
-      return throwError(() => new Error('No hay refresh token disponible'));
-    }
+    this.meRequest$ = this.http.get<UserResponse>(AUTH_ENDPOINTS.me).pipe(
+      tap(user => this.currentUser.setFromApi(user)),
+      finalize(() => {
+        this.meRequest$ = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
 
-    const body: RefreshTokenRequest = { refreshToken };
-    this.refreshRequest$ = this.http
-      .post<LoginResponse>(AUTH_ENDPOINTS.refresh, body)
-      .pipe(
-        tap(response => this.saveSession(response)),
-        finalize(() => {
-          this.refreshRequest$ = null;
-        }),
-        shareReplay({ bufferSize: 1, refCount: false })
-      );
-
-    return this.refreshRequest$;
+    return this.meRequest$;
   }
 
+  /** El backend no invalida el token: basta con borrarlo del storage. */
   logout(): Observable<void> {
     return this.http.post<void>(AUTH_ENDPOINTS.logout, null).pipe(
       catchError(() => of(void 0)),
@@ -75,13 +68,22 @@ export class AuthService {
     );
   }
 
+  /**
+   * Confirma la sesión antes de entrar a una ruta protegida: token
+   * presente y vigente, y cuenta todavía activa según /auth/me.
+   */
   ensureValidSession(): Observable<boolean> {
     const accessToken = this.tokenStorage.getAccessToken();
-    if (accessToken && !isTokenExpired(accessToken)) {
+    if (!accessToken || isTokenExpired(accessToken)) {
+      this.clearSession(false);
+      return of(false);
+    }
+
+    if (this.currentUser.verified()) {
       return of(true);
     }
 
-    return this.refresh().pipe(
+    return this.me().pipe(
       map(() => true),
       catchError(() => {
         this.clearSession(false);
@@ -91,8 +93,9 @@ export class AuthService {
   }
 
   clearSession(redirect = true): void {
-    this.tokenStorage.clearTokens();
+    this.tokenStorage.clearToken();
     this.currentUser.clear();
+    this.meRequest$ = null;
     if (redirect) {
       void this.router.navigate(['/auth/login']);
     }
@@ -100,10 +103,5 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.tokenStorage.getAccessToken();
-  }
-
-  private saveSession(response: LoginResponse): void {
-    this.tokenStorage.saveTokens(response.accessToken, response.refreshToken);
-    this.currentUser.loadFromStorage();
   }
 }

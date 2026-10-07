@@ -1,24 +1,51 @@
 <div class="parking-page">
   <h2>Estacionamiento</h2>
 
+  <div class="filters" role="group" aria-label="Filtrar por tipo de vehículo">
+    <button type="button" class="chip" [class.active]="selectedType() === null" (click)="selectType(null)">
+      Todos
+      <span class="chip-count" *ngIf="stream.occupancy() as occupancy">{{ occupancy.availableSpaces }} libres</span>
+    </button>
+    <button
+      type="button"
+      class="chip"
+      *ngFor="let type of vehicleTypes"
+      [class.active]="selectedType() === type"
+      (click)="selectType(type)"
+    >
+      {{ vehicleTypeLabels[type] }}
+      <span class="chip-count" *ngIf="availableFor(type) as available; else noneFree">{{ available }} libres</span>
+      <ng-template #noneFree>
+        <span class="chip-count none" *ngIf="availableFor(type) === 0">sin espacios</span>
+      </ng-template>
+    </button>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
   <p *ngIf="loading" class="loading">Cargando espacios...</p>
 
   <div class="grid" *ngIf="!loading">
-    <div
-      *ngFor="let slot of slots"
+    <button
+      type="button"
+      *ngFor="let space of visibleSpaces()"
       class="slot"
-      [ngClass]="getStatusClass(slot.status)"
+      [ngClass]="statusClass(space.status)"
+      [disabled]="updatingSpaceId === space.id"
+      (click)="toggleStatus(space)"
+      [attr.aria-label]="space.code + ': ' + statusLabels[space.status]"
     >
-      <span class="code">{{ slot.code }}</span>
-      <span class="status-label">{{ slot.status }}</span>
-      <span class="plate" *ngIf="slot.vehiclePlate">{{ slot.vehiclePlate }}</span>
-    </div>
+      <span class="material-symbols-outlined type-icon">
+        {{ space.vehicleType === 'CAR' ? 'directions_car' : 'two_wheeler' }}
+      </span>
+      <span class="code">{{ space.code }}</span>
+      <span class="status-label">{{ statusLabels[space.status] }}</span>
+    </button>
   </div>
 
   <div class="legend">
-    <span class="dot available"></span> Disponible
-    <span class="dot occupied"></span> Ocupado
-    <span class="dot reserved"></span> Reservado
-    <span class="dot maintenance"></span> Mantenimiento
+    <span><span class="dot available"></span> Disponible</span>
+    <span><span class="dot occupied"></span> Ocupado</span>
+    <span class="hint-text">Haz clic en un espacio para cambiar su estado.</span>
   </div>
 </div>

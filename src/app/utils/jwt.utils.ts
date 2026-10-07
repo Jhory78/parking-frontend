@@ -1,6 +1,6 @@
-import { AuthUser } from '../models/auth.model';
+import { JwtClaims } from '../models/auth.model';
 
-export function decodeJwt(token: string): AuthUser | null {
+export function decodeJwt(token: string): JwtClaims | null {
   try {
     const payload = token.split('.')[1];
     if (!payload) return null;
@@ -14,7 +14,7 @@ export function decodeJwt(token: string): AuthUser | null {
         .join('')
     );
 
-    return JSON.parse(json) as AuthUser;
+    return JSON.parse(json) as JwtClaims;
   } catch {
     return null;
   }

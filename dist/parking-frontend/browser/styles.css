@@ -1,0 +1,220 @@
+/* src/styles.css */
+:root {
+  --pk-primary: #00f0ff;
+  --pk-primary-dim: #00dbe9;
+  --pk-primary-strong: #7df4ff;
+  --pk-primary-soft: rgba(0, 240, 255, .12);
+  --pk-on-primary: #002022;
+  --pk-secondary: #ffb95f;
+  --pk-secondary-soft: rgba(255, 185, 95, .14);
+  --pk-on-secondary: #472a00;
+  --pk-tertiary: #65f2b5;
+  --pk-tertiary-soft: rgba(101, 242, 181, .14);
+  --pk-neutral: #849495;
+  --pk-bg: #0d1320;
+  --pk-surface: #1a1f2d;
+  --pk-surface-soft: #161b29;
+  --pk-surface-high: #242a38;
+  --pk-surface-highest: #2f3543;
+  --pk-border: #2f3543;
+  --pk-border-strong: #3b494b;
+  --pk-ink: #dde2f5;
+  --pk-ink-soft: #b9cacb;
+  --pk-ink-muted: #849495;
+  --pk-success: #65f2b5;
+  --pk-success-soft: rgba(101, 242, 181, .14);
+  --pk-danger: #ffb4ab;
+  --pk-danger-soft: rgba(255, 180, 171, .14);
+  --pk-radius-sm: 8px;
+  --pk-radius: 12px;
+  --pk-radius-lg: 16px;
+  --pk-radius-pill: 999px;
+  --pk-shadow-sm: 0 2px 8px rgba(0, 0, 0, .35);
+  --pk-shadow: 0 12px 32px rgba(0, 0, 0, .45);
+  --pk-shadow-lg: 0 24px 64px rgba(0, 0, 0, .55);
+  --pk-glow: 0 8px 24px rgba(0, 240, 255, .25);
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family:
+    "Plus Jakarta Sans",
+    system-ui,
+    sans-serif;
+  color: var(--pk-ink);
+  background: var(--pk-bg);
+  min-height: 100vh;
+}
+h1,
+h2,
+h3 {
+  color: var(--pk-ink);
+  letter-spacing: -0.02em;
+}
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .7rem 1.4rem;
+  border: 1px solid transparent;
+  border-radius: var(--pk-radius-pill);
+  font-family: inherit;
+  font-size: .88rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .01em;
+  cursor: pointer;
+  transition:
+    transform .15s ease,
+    background .15s ease,
+    border-color .15s ease;
+}
+.btn:active:not(:disabled) {
+  transform: scale(.97);
+}
+.btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  color: var(--pk-on-primary);
+  background: var(--pk-primary);
+  box-shadow: var(--pk-glow);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--pk-primary-dim);
+}
+.btn-secondary {
+  color: var(--pk-secondary);
+  background: var(--pk-secondary-soft);
+}
+.btn-outlined {
+  color: var(--pk-ink-soft);
+  background: transparent;
+  border-color: var(--pk-border-strong);
+}
+.btn-outlined:hover:not(:disabled) {
+  color: var(--pk-primary);
+  border-color: var(--pk-primary);
+}
+.btn-success {
+  color: var(--pk-on-primary);
+  background: var(--pk-tertiary);
+}
+.btn-danger {
+  color: var(--pk-danger);
+  background: var(--pk-danger-soft);
+}
+.btn-sm {
+  padding: .45rem .9rem;
+  font-size: .78rem;
+}
+.card {
+  background: var(--pk-surface);
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-lg);
+  box-shadow: var(--pk-shadow);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: .3rem .75rem;
+  border-radius: var(--pk-radius-pill);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.badge-role {
+  color: var(--pk-primary);
+  background: var(--pk-primary-soft);
+}
+.badge-admin {
+  color: var(--pk-secondary);
+  background: var(--pk-secondary-soft);
+}
+.badge-success {
+  color: var(--pk-success);
+  background: var(--pk-success-soft);
+}
+.badge-danger {
+  color: var(--pk-danger);
+  background: var(--pk-danger-soft);
+}
+.form-label {
+  display: block;
+  margin-bottom: .45rem;
+  color: var(--pk-ink-soft);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.form-control {
+  width: 100%;
+  padding: .8rem 1rem;
+  border: 1px solid transparent;
+  border-radius: var(--pk-radius-sm);
+  background: rgba(47, 53, 67, .6);
+  color: var(--pk-ink);
+  font-family: inherit;
+  font-size: .875rem;
+  transition:
+    background .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+.form-control::placeholder {
+  color: var(--pk-ink-muted);
+}
+.form-control:focus {
+  outline: none;
+  background: var(--pk-surface-highest);
+  border-color: var(--pk-primary);
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, .12);
+}
+.form-control.invalid {
+  border-color: var(--pk-danger);
+}
+select.form-control {
+  appearance: none;
+  cursor: pointer;
+}
+select.form-control option {
+  background: var(--pk-surface-high);
+}
+.hint {
+  display: block;
+  margin-top: .4rem;
+  color: var(--pk-danger);
+  font-size: .75rem;
+}
+.alert {
+  padding: .8rem 1.1rem;
+  border-radius: var(--pk-radius);
+  font-size: .85rem;
+}
+.alert-error {
+  color: var(--pk-danger);
+  background: var(--pk-danger-soft);
+}
+.alert-success {
+  color: var(--pk-success);
+  background: var(--pk-success-soft);
+}
+
+/* angular:styles/global:styles */
+/*# sourceMappingURL=styles.css.map */

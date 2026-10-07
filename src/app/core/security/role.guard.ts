@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { catchError, map, of, switchMap } from 'rxjs';
-import { RolUsuario } from '../../models/auth.model';
+import { map } from 'rxjs';
+import { UserRole } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 import { CurrentUserService } from '../users/current-user.service';
 import { AuthorizationFeedbackService } from './authorization-feedback.service';
@@ -11,22 +11,21 @@ export const roleGuard: CanActivateFn = route => {
   const currentUser = inject(CurrentUserService);
   const feedback = inject(AuthorizationFeedbackService);
   const router = inject(Router);
-  const allowedRoles = (route.data?.['roles'] ?? []) as RolUsuario[];
+  const allowedRoles = (route.data?.['roles'] ?? []) as UserRole[];
 
+  // ensureValidSession confirma el rol con /auth/me, no solo con el JWT.
   return authService.ensureValidSession().pipe(
-    switchMap(isAuthenticated => {
+    map(isAuthenticated => {
       if (!isAuthenticated) {
-        return of(router.createUrlTree(['/auth/login']));
+        return router.createUrlTree(['/auth/login']);
       }
 
-      const isAllowed = allowedRoles.some(role => currentUser.hasRole(role));
-      if (isAllowed) {
-        return of(true);
+      if (allowedRoles.some(role => currentUser.hasRole(role))) {
+        return true;
       }
 
       feedback.showForbidden();
-      return of(router.createUrlTree(['/dashboard']));
-    }),
-    catchError(() => of(router.createUrlTree(['/auth/login'])))
+      return router.createUrlTree(['/dashboard']);
+    })
   );
 };

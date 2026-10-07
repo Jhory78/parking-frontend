@@ -1,29 +1,222 @@
-.auth-container {
+.auth-page {
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
   min-height: 100vh;
+}
+
+/* ---------- Panel visual ---------- */
+.showcase {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2.5rem 3rem;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 500px at 15% 0%, rgba(0, 240, 255, .07), transparent 60%),
+    radial-gradient(700px 500px at 90% 90%, rgba(255, 185, 95, .06), transparent 60%),
+    var(--pk-surface-soft);
+  border-right: 1px solid var(--pk-border);
+}
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.glow-cyan {
+  top: -6rem;
+  left: -6rem;
+  width: 22rem;
+  height: 22rem;
+  background: rgba(0, 240, 255, .10);
+  animation: breathe 6s ease-in-out infinite;
+}
+.glow-amber {
+  bottom: -8rem;
+  right: -6rem;
+  width: 20rem;
+  height: 20rem;
+  background: rgba(255, 185, 95, .08);
+  animation: breathe 8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: .5; }
+  50%      { opacity: 1; }
+}
+
+.logo { position: relative; width: 190px; height: auto; }
+
+.showcase-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+app-parking-radar { width: 100%; max-width: 560px; height: 19rem; }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .3rem 1rem;
+  border-radius: var(--pk-radius-pill);
+  background: var(--pk-surface-high);
+  color: var(--pk-tertiary);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.ping {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pk-tertiary);
+  animation: ping 1.6s cubic-bezier(0, 0, .2, 1) infinite;
+}
+@keyframes ping {
+  0%   { box-shadow: 0 0 0 0 rgba(101, 242, 181, .6); }
+  100% { box-shadow: 0 0 0 7px rgba(101, 242, 181, 0); }
+}
+
+.showcase-footer { position: relative; max-width: 30rem; }
+.showcase-footer h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.1; }
+.accent {
+  background: linear-gradient(90deg, var(--pk-primary) 0%, var(--pk-secondary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.showcase-footer p {
+  margin-top: .6rem;
+  color: var(--pk-ink-soft);
+  font-size: .95rem;
+  line-height: 1.5;
+}
+
+/* ---------- Panel del formulario ---------- */
+.form-side {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0f172a;
+  padding: 2.5rem 3rem;
 }
-.auth-card {
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 12px;
-  padding: 2.5rem;
+.form-inner { width: 100%; max-width: 380px; }
+
+h2 { font-size: 1.9rem; font-weight: 800; letter-spacing: -.02em; }
+.form-hint {
+  margin: .5rem 0 2rem;
+  color: var(--pk-ink-soft);
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
+form { display: flex; flex-direction: column; gap: 1.1rem; }
+
+.input-wrap { position: relative; display: flex; align-items: center; }
+.leading-icon {
+  position: absolute;
+  left: .75rem;
+  color: var(--pk-ink-muted);
+  font-size: 20px;
+  pointer-events: none;
+}
+.form-control.has-icon { padding-left: 2.6rem; }
+.form-control.has-action { padding-right: 2.9rem; }
+
+.toggle-password {
+  position: absolute;
+  right: .4rem;
+  display: grid;
+  place-items: center;
+  padding: .35rem;
+  border: 0;
+  border-radius: var(--pk-radius-sm);
+  background: transparent;
+  color: var(--pk-ink-muted);
+  cursor: pointer;
+  transition: color .15s ease;
+}
+.toggle-password:hover { color: var(--pk-primary); }
+.toggle-password .material-symbols-outlined { font-size: 20px; }
+
+/* ---------- CTA ---------- */
+.submit {
+  position: relative;
+  overflow: hidden;
   width: 100%;
-  max-width: 400px;
+  margin-top: .4rem;
+  padding: .95rem 1rem;
+  font-size: .95rem;
 }
-h1 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; }
-h2 { color: #f1f5f9; font-size: 1.5rem; margin-bottom: 2rem; }
-.field { margin-bottom: 1.25rem; }
-label { display: block; color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.5rem; }
-input { width: 100%; padding: 0.7rem 1rem; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f1f5f9; font-size: 1rem; box-sizing: border-box; }
-input:focus { outline: none; border-color: #38bdf8; }
-button { width: 100%; padding: 0.8rem; background: #38bdf8; color: #0f172a; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem; }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-.error { color: #f87171; font-size: 0.85rem; margin-bottom: 0.5rem; }
-.link { color: #64748b; font-size: 0.9rem; text-align: center; margin-top: 1.5rem; }
-.link a { color: #38bdf8; text-decoration: none; }
-input.invalid { border-color: #f87171; }
-input.invalid:focus { border-color: #f87171; box-shadow: 0 0 0 2px rgba(248,113,113,0.2); }
-.hint { display: block; color: #f87171; font-size: 0.78rem; margin-top: 0.35rem; }
+.submit-text { position: relative; z-index: 1; }
+.submit .material-symbols-outlined { position: relative; z-index: 1; font-size: 20px; }
+.shimmer {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .45), transparent);
+  transform: skewX(-12deg);
+  animation: sweep 2.8s ease-in-out infinite;
+}
+@keyframes sweep {
+  0%        { transform: translateX(-120%) skewX(-12deg); }
+  60%, 100% { transform: translateX(260%) skewX(-12deg); }
+}
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Pie ---------- */
+.auth-footer {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--pk-border);
+  color: var(--pk-ink-muted);
+  font-size: .8rem;
+}
+.support { display: inline-flex; align-items: center; gap: .3rem; }
+.support .material-symbols-outlined { color: var(--pk-primary); font-size: 16px; }
+
+/* ---------- Responsive ----------
+   En una columna el panel visual no se oculta: se apila como cabecera,
+   con el plano animado y el titular encima del formulario. */
+@media (max-width: 1024px) {
+  .auth-page { grid-template-columns: 1fr; }
+
+  .showcase {
+    align-items: center;
+    gap: 1.25rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--pk-border);
+  }
+  .logo { width: 170px; }
+  app-parking-radar { height: 13rem; }
+  .showcase-footer h1 { font-size: 1.7rem; }
+  .showcase-footer p { font-size: .88rem; }
+
+  /* El titular del panel ya hace de encabezado. */
+  .form-side { padding: 2rem 1.5rem 2.5rem; }
+  .form-inner { max-width: 420px; }
+  .form-side h2,
+  .form-hint { display: none; }
+}
+
+@media (max-width: 560px) {
+  .showcase { padding: 1.5rem 1rem; }
+  .logo { width: 150px; }
+  app-parking-radar { height: 10.5rem; }
+  .showcase-footer h1 { font-size: 1.45rem; }
+  .form-side { padding: 1.75rem 1rem 2.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow, .ping, .shimmer { animation: none; }
+}

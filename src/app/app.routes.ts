@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/security/auth.guard';
+import { roleGuard } from './core/security/role.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -10,10 +11,8 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./feat/auth/login/login.component').then(m => m.LoginComponent)
       },
-      {
-        path: 'register',
-        loadComponent: () => import('./feat/auth/register/register.component').then(m => m.RegisterComponent)
-      }
+      // No hay registro público: las cuentas las crea un ADMIN desde /usuarios.
+      { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
   },
   {
@@ -25,6 +24,12 @@ export const routes: Routes = [
     path: 'parking',
     canActivate: [authGuard],
     loadComponent: () => import('./feat/parking/parking.component').then(m => m.ParkingComponent)
+  },
+  {
+    path: 'usuarios',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN'] },
+    loadComponent: () => import('./feat/usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
   { path: '**', redirectTo: '/dashboard' }
 ];

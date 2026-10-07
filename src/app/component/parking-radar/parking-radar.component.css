@@ -1,0 +1,85 @@
+/* La altura se puede ajustar desde el componente que lo usa. */
+:host {
+  display: block;
+  height: 14rem;
+}
+.radar {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(0, 240, 255, .2);
+  border-radius: var(--pk-radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 240, 255, .10);
+}
+svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #090e17;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* Sensores de bahía */
+@keyframes sensorPulse {
+  0%, 100% { opacity: .3; transform: scale(1); }
+  50%      { opacity: .9; transform: scale(1.15); }
+}
+.sensor-dot {
+  transform-origin: center;
+  animation: sensorPulse 2.4s infinite ease-in-out;
+}
+
+/* El auto entra por el pasillo y gira hacia la bahía B-02 */
+@keyframes carParkFlow {
+  0%        { transform: translate(200px, -40px) rotate(180deg); }
+  25%       { transform: translate(200px, 70px) rotate(180deg); }
+  45%       { transform: translate(200px, 120px) rotate(180deg); }
+  60%       { transform: translate(200px, 120px) rotate(90deg); }
+  75%       { transform: translate(270px, 120px) rotate(90deg); }
+  85%       { transform: translate(320px, 120px) rotate(90deg); }
+  96%, 100% { transform: translate(325px, 120px) rotate(90deg); }
+}
+.moving-car { animation: carParkFlow 11s infinite cubic-bezier(.45, .05, .55, .95); }
+
+/* La moto sube por el pasillo y entra a M-01 */
+@keyframes motoParkFlow {
+  0%        { transform: translate(165px, 280px) rotate(0deg); }
+  30%       { transform: translate(165px, 120px) rotate(0deg); }
+  50%       { transform: translate(165px, 50px) rotate(0deg); }
+  65%       { transform: translate(165px, 45px) rotate(-90deg); }
+  80%       { transform: translate(85px, 45px) rotate(-90deg); }
+  95%, 100% { transform: translate(75px, 45px) rotate(-90deg); }
+}
+.moving-moto {
+  animation: motoParkFlow 9.5s infinite cubic-bezier(.4, 0, .6, 1);
+  animation-delay: 1.5s;
+}
+
+/* El sensor de cada bahía pasa a ocupado cuando llega el vehículo */
+@keyframes baySensorB2 {
+  0%, 72%   { fill: #00f0ff; filter: url(#neon-cyan); }
+  75%, 100% { fill: #ff6b6b; filter: none; }
+}
+.sensor-b2 { animation: baySensorB2 11s infinite; }
+
+@keyframes baySensorM1 {
+  0%, 75%   { fill: #ffb95f; filter: url(#neon-amber); }
+  78%, 100% { fill: #ff6b6b; filter: none; }
+}
+.sensor-m1 {
+  animation: baySensorM1 9.5s infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes laneDash {
+  to { stroke-dashoffset: -32; }
+}
+.animated-lane { animation: laneDash 2s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sensor-dot, .moving-car, .moving-moto, .sensor-b2, .sensor-m1, .animated-lane {
+    animation: none;
+  }
+  .moving-car  { transform: translate(325px, 120px) rotate(90deg); }
+  .moving-moto { transform: translate(75px, 45px) rotate(-90deg); }
+}

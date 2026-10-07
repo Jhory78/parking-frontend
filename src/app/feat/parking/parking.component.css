@@ -1,26 +1,100 @@
-.parking-page { padding: 2rem; }
-h2 { color: #f1f5f9; margin-bottom: 1.5rem; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; margin-bottom: 2rem; }
-.slot {
-  border: 2px solid #334155;
-  border-radius: 10px;
-  padding: 1rem 0.5rem;
-  text-align: center;
-  cursor: default;
-  transition: transform 0.15s;
+.parking-page { padding: 2rem 2rem 3rem; }
+h2 { margin-bottom: 1.5rem; font-size: 2rem; }
+
+.filters { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.5rem; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem 1rem;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: var(--pk-radius-pill);
+  color: var(--pk-ink-soft);
+  background: var(--pk-surface);
+  font-family: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease;
 }
-.slot:hover { transform: scale(1.04); }
-.slot.available  { border-color: #4ade80; background: rgba(74,222,128,0.08); }
-.slot.occupied   { border-color: #f87171; background: rgba(248,113,113,0.08); }
-.slot.reserved   { border-color: #fbbf24; background: rgba(251,191,36,0.08); }
-.slot.maintenance{ border-color: #94a3b8; background: rgba(148,163,184,0.08); }
-.code { display: block; color: #f1f5f9; font-weight: 700; font-size: 1.1rem; }
-.status-label { display: block; font-size: 0.65rem; color: #64748b; text-transform: uppercase; margin-top: 0.25rem; }
-.plate { display: block; font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; }
-.legend { display: flex; align-items: center; gap: 1.25rem; color: #64748b; font-size: 0.85rem; }
-.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
-.dot.available  { background: #4ade80; }
-.dot.occupied   { background: #f87171; }
-.dot.reserved   { background: #fbbf24; }
-.dot.maintenance{ background: #94a3b8; }
-.loading { color: #64748b; }
+.chip:hover { border-color: var(--pk-primary); color: var(--pk-primary); }
+.chip.active { border-color: var(--pk-primary); color: var(--pk-on-primary); background: var(--pk-primary); }
+.chip-count {
+  padding: .1rem .5rem;
+  border-radius: var(--pk-radius-pill);
+  background: rgba(0, 0, 0, .2);
+  font-size: .72rem;
+}
+.chip-count.none { color: var(--pk-danger); }
+
+.alert { margin-bottom: 1.25rem; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: .9rem;
+  margin-bottom: 2rem;
+}
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.1rem .5rem;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius);
+  color: var(--pk-ink);
+  background: var(--pk-surface);
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .3s ease;
+}
+.slot:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--pk-shadow); }
+.slot:focus-visible { outline: 2px solid var(--pk-primary); outline-offset: 2px; }
+.slot:disabled { opacity: .6; cursor: wait; }
+
+.slot.available { background: var(--pk-tertiary-soft); border-color: rgba(101, 242, 181, .35); }
+.slot.occupied  { background: var(--pk-danger-soft); border-color: rgba(255, 180, 171, .3); }
+
+.type-icon { margin-bottom: .2rem; color: var(--pk-ink-soft); font-size: 20px; }
+.code { display: block; font-size: 1.1rem; font-weight: 700; }
+.status-label {
+  display: block;
+  margin-top: .3rem;
+  color: var(--pk-ink-muted);
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--pk-border);
+  border-radius: var(--pk-radius-pill);
+  background: var(--pk-surface);
+  color: var(--pk-ink-soft);
+  font-size: .85rem;
+}
+.hint-text { margin-left: auto; color: var(--pk-ink-muted); font-size: .78rem; }
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+.dot.available { background: var(--pk-tertiary); }
+.dot.occupied  { background: var(--pk-danger); }
+
+.loading { color: var(--pk-ink-muted); }
+
+@media (max-width: 640px) {
+  .parking-page { padding: 1.5rem 1rem 2.5rem; }
+  h2 { font-size: 1.6rem; }
+  .hint-text { margin-left: 0; }
+}

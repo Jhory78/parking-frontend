@@ -1,24 +1,62 @@
 <div class="dashboard">
-  <h2>Dashboard</h2>
+  <header class="page-header">
+    <span class="pill" [class.offline]="!stream.connected()">
+      <span class="ping"></span>
+      {{ stream.connected() ? 'Monitoreo en tiempo real' : 'Conectando...' }}
+    </span>
+    <h2>Estado del <span class="accent">estacionamiento</span></h2>
+    <p class="subtitle">Resumen de ocupación de todas las plazas registradas.</p>
+  </header>
 
-  <div class="stats" *ngIf="!loading">
-    <div class="stat available">
-      <span class="num">{{ available }}</span>
-      <span class="label">Disponibles</span>
+  <ng-container *ngIf="stream.occupancy() as occupancy; else loadingTpl">
+    <div class="stats">
+      <div class="stat available">
+        <span class="material-symbols-outlined stat-icon">local_parking</span>
+        <span class="num">{{ occupancy.availableSpaces }}</span>
+        <span class="label">Disponibles</span>
+      </div>
+      <div class="stat occupied">
+        <span class="material-symbols-outlined stat-icon">directions_car</span>
+        <span class="num">{{ occupancy.occupiedSpaces }}</span>
+        <span class="label">Ocupados</span>
+      </div>
+      <div class="stat percentage" [ngClass]="occupancy.level | lowercase">
+        <span class="material-symbols-outlined stat-icon">speed</span>
+        <span class="num">{{ occupancy.occupancyPercentage }}%</span>
+        <span class="label">Ocupación</span>
+      </div>
+      <div class="stat total">
+        <span class="material-symbols-outlined stat-icon">pin_drop</span>
+        <span class="num">{{ occupancy.totalSpaces }}</span>
+        <span class="label">Total de plazas</span>
+      </div>
     </div>
-    <div class="stat occupied">
-      <span class="num">{{ occupied }}</span>
-      <span class="label">Ocupados</span>
-    </div>
-    <div class="stat reserved">
-      <span class="num">{{ reserved }}</span>
-      <span class="label">Reservados</span>
-    </div>
-    <div class="stat total">
-      <span class="num">{{ slots.length }}</span>
-      <span class="label">Total</span>
-    </div>
-  </div>
 
-  <p *ngIf="loading" class="loading">Cargando datos...</p>
+    <h3 class="section-title">Disponibilidad por tipo de vehículo</h3>
+    <div class="types">
+      <div class="type-card" *ngFor="let type of occupancy.byVehicleType" [class.full]="type.availableSpaces === 0">
+        <div class="type-header">
+          <span class="material-symbols-outlined">
+            {{ type.vehicleType === 'CAR' ? 'directions_car' : 'two_wheeler' }}
+          </span>
+          <span class="type-name">{{ vehicleTypeLabels[type.vehicleType] }}</span>
+          <span class="type-count">{{ type.availableSpaces }} / {{ type.totalSpaces }} libres</span>
+        </div>
+        <div class="bar" role="progressbar"
+             [attr.aria-valuenow]="type.occupancyPercentage" aria-valuemin="0" aria-valuemax="100">
+          <div class="bar-fill" [style.width.%]="type.occupancyPercentage"></div>
+        </div>
+        <span class="type-full" *ngIf="type.availableSpaces === 0">Sin espacios para este tipo</span>
+      </div>
+    </div>
+
+    <div class="barrier" [class.blocked]="occupancy.entryBlocked">
+      <span class="material-symbols-outlined">{{ occupancy.entryBlocked ? 'block' : 'check_circle' }}</span>
+      {{ occupancy.entryBlocked ? 'Barrera de ingreso bloqueada: parqueadero lleno' : 'Barrera de ingreso habilitada' }}
+    </div>
+  </ng-container>
+
+  <ng-template #loadingTpl>
+    <p class="loading">Cargando datos...</p>
+  </ng-template>
 </div>

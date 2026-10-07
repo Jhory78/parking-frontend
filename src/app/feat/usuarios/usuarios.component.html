@@ -1,0 +1,162 @@
+<div class="usuarios-container">
+  <header class="page-header">
+    <div>
+      <span class="pill">Solo administradores</span>
+      <h2>Gestión de <span class="accent">operarios</span></h2>
+      <p class="subtitle">Crea cuentas, actualiza credenciales y controla el acceso.</p>
+    </div>
+    <button class="btn btn-primary" (click)="iniciarCreacion()">+ Nuevo operario</button>
+  </header>
+
+  <p class="alert alert-error" *ngIf="error">{{ error }}</p>
+  <p class="alert alert-success" *ngIf="success">{{ success }}</p>
+
+  <div class="table-card" *ngIf="!loading">
+    <table class="usuarios-table">
+      <thead>
+        <tr>
+          <th>Operario</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th class="right">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of usuarios">
+          <td>
+            <div class="user-cell">
+              <span class="avatar">{{ inicial(user) }}</span>
+              <span class="user-text">
+                <span class="user-name">
+                  {{ user.name }}
+                  <span class="self-tag" *ngIf="esCuentaPropia(user)">tú</span>
+                </span>
+                <span class="user-email">{{ user.email }}</span>
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="user.role === 'ADMIN' ? 'badge-admin' : 'badge-role'">
+              {{ roleLabels[user.role] }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="user.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
+              {{ statusLabels[user.status] }}
+            </span>
+          </td>
+          <td class="actions right">
+            <button class="btn btn-secondary btn-sm" (click)="iniciarEdicion(user)">Editar</button>
+            <!-- Nadie puede desactivar su propia cuenta: el backend responde 409. -->
+            <button
+              *ngIf="user.status === 'ACTIVE' && !esCuentaPropia(user)"
+              class="btn btn-danger btn-sm"
+              (click)="cambiarEstado(user, 'INACTIVE')"
+            >
+              Desactivar
+            </button>
+            <button
+              *ngIf="user.status === 'INACTIVE'"
+              class="btn btn-success btn-sm"
+              (click)="cambiarEstado(user, 'ACTIVE')"
+            >
+              Activar
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="!usuarios.length">
+          <td colspan="4" class="empty">Todavía no hay operarios registrados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p *ngIf="loading" class="loading">Cargando operarios...</p>
+
+  <!-- Alta de operario -->
+  <div class="modal-backdrop" *ngIf="modo === 'crear'">
+    <div class="modal">
+      <h3>Nuevo operario</h3>
+      <p class="modal-subtitle">La cuenta queda activa de inmediato.</p>
+      <form [formGroup]="createForm" (ngSubmit)="guardarCreacion()">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" formControlName="name" class="form-control" placeholder="Nombre completo" />
+          <span class="hint" *ngIf="createForm.get('name')?.hasError('required') && createForm.get('name')?.touched">
+            El nombre es requerido
+          </span>
+          <span class="hint" *ngIf="fieldErrors['name']">{{ fieldErrors['name'] }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo</label>
+          <input type="email" formControlName="email" class="form-control" placeholder="usuario@email.com" />
+          <span class="hint" *ngIf="createForm.get('email')?.invalid && createForm.get('email')?.touched">
+            Ingresa un correo válido
+          </span>
+          <span class="hint" *ngIf="fieldErrors['email']">{{ fieldErrors['email'] }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input type="password" formControlName="password" class="form-control" placeholder="Mínimo 6 caracteres" />
+          <span class="hint" *ngIf="createForm.get('password')?.invalid && createForm.get('password')?.touched">
+            La contraseña debe tener al menos 6 caracteres
+          </span>
+          <span class="hint" *ngIf="fieldErrors['password']">{{ fieldErrors['password'] }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rol</label>
+          <select formControlName="role" class="form-control">
+            <option value="OPERATOR">Operario</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outlined" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving || createForm.invalid">
+            {{ saving ? 'Creando...' : 'Crear operario' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edición de datos y credenciales -->
+  <div class="modal-backdrop" *ngIf="modo === 'editar' && editingUser">
+    <div class="modal">
+      <h3>Editar operario</h3>
+      <p class="modal-subtitle">{{ editingUser.email }}</p>
+      <form [formGroup]="editForm" (ngSubmit)="guardarEdicion()">
+        <div class="form-group">
+          <label class="form-label">Nombre</label>
+          <input type="text" formControlName="name" class="form-control" />
+          <span class="hint" *ngIf="editForm.get('name')?.hasError('required') && editForm.get('name')?.touched">
+            El nombre es requerido
+          </span>
+          <span class="hint" *ngIf="fieldErrors['name']">{{ fieldErrors['name'] }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo</label>
+          <input type="email" formControlName="email" class="form-control" />
+          <span class="hint" *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+            Ingresa un correo válido
+          </span>
+          <span class="hint" *ngIf="fieldErrors['email']">{{ fieldErrors['email'] }}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nueva contraseña</label>
+          <input type="password" formControlName="password" class="form-control" placeholder="Déjalo vacío para no cambiarla" />
+          <span class="hint" *ngIf="editForm.get('password')?.hasError('minlength')">
+            Si cambias la contraseña, debe tener al menos 6 caracteres
+          </span>
+          <span class="hint" *ngIf="fieldErrors['password']">{{ fieldErrors['password'] }}</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outlined" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="saving || editForm.invalid">
+            {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

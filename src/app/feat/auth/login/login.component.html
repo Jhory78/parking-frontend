@@ -1,45 +1,103 @@
-<div class="auth-container">
-    <div class="auth-card">
-        <h1>Parking System</h1>
-        <h2>Iniciar sesión</h2>
+<div class="auth-page">
+    <!-- Panel visual -->
+    <section class="showcase">
+        <div class="glow glow-cyan"></div>
+        <div class="glow glow-amber"></div>
 
-        <form [formGroup]="form" (ngSubmit)="submit()">
-            <div class="field">
-                <label>Correo</label>
-                <input
-                        type="email"
-                        formControlName="correo"
-                        placeholder="usuario@email.com"
-                        [class.invalid]="form.get('correo')?.invalid && form.get('correo')?.touched"
-                />
-                <span class="hint" *ngIf="form.get('correo')?.hasError('required') && form.get('correo')?.touched">
-          El correo es requerido
-        </span>
-                <span class="hint" *ngIf="form.get('correo')?.hasError('email') && form.get('correo')?.touched">
-          Ingresa un correo válido
-        </span>
-            </div>
+        <img class="logo" src="assets/logo.png" alt="Parking System" />
 
-            <div class="field">
-                <label>Contraseña</label>
-                <input
-                        type="password"
-                        formControlName="password"
-                        placeholder="••••••••"
-                        [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
-                />
-                <span class="hint" *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched">
-          La contraseña es requerida
-        </span>
-            </div>
+        <div class="showcase-body">
+            <app-parking-radar></app-parking-radar>
 
-            <p class="error" *ngIf="error">{{ error }}</p>
+            <span class="status-pill">
+                <span class="ping"></span>
+                Monitoreo en tiempo real
+            </span>
+        </div>
 
-            <button type="submit" [disabled]="loading || form.invalid">
-                {{ loading ? 'Ingresando...' : 'Ingresar' }}
-            </button>
-        </form>
+        <div class="showcase-footer">
+            <h1>Acceso <span class="accent">Inteligente</span></h1>
+            <p>Control de sensores telemáticos y navegación sin fricción a tu bahía asignada.</p>
+        </div>
+    </section>
 
-        <p class="link">¿No tienes cuenta? <a routerLink="/auth/register">Regístrate</a></p>
-    </div>
+    <!-- Panel de credenciales -->
+    <section class="form-side">
+        <div class="form-inner">
+            <h2>Iniciar sesión</h2>
+            <p class="form-hint">Entra con tu correo corporativo para gestionar el estacionamiento.</p>
+
+            <form [formGroup]="form" (ngSubmit)="submit()">
+                <div class="field">
+                    <label class="form-label" for="email">Correo electrónico</label>
+                    <div class="input-wrap">
+                        <span class="material-symbols-outlined leading-icon">badge</span>
+                        <input
+                                id="email"
+                                type="email"
+                                class="form-control has-icon"
+                                formControlName="email"
+                                placeholder="usuario@email.com"
+                                autocomplete="username"
+                                [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                        />
+                    </div>
+                    <span class="hint" *ngIf="form.get('email')?.hasError('required') && form.get('email')?.touched">
+                        El correo es requerido
+                    </span>
+                    <span class="hint" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">
+                        Ingresa un correo válido
+                    </span>
+                    <span class="hint" *ngIf="fieldErrors['email']">{{ fieldErrors['email'] }}</span>
+                </div>
+
+                <div class="field">
+                    <label class="form-label" for="password">Contraseña de seguridad</label>
+                    <div class="input-wrap">
+                        <span class="material-symbols-outlined leading-icon">lock_clock</span>
+                        <input
+                                id="password"
+                                class="form-control has-icon has-action"
+                                formControlName="password"
+                                [type]="showPassword ? 'text' : 'password'"
+                                placeholder="••••••••••••"
+                                autocomplete="current-password"
+                                [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                        />
+                        <button
+                                type="button"
+                                class="toggle-password"
+                                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                                (click)="togglePassword()"
+                        >
+                            <span class="material-symbols-outlined">
+                                {{ showPassword ? 'visibility_off' : 'visibility' }}
+                            </span>
+                        </button>
+                    </div>
+                    <span class="hint" *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched">
+                        La contraseña es requerida
+                    </span>
+                    <span class="hint" *ngIf="fieldErrors['password']">{{ fieldErrors['password'] }}</span>
+                </div>
+
+                <p class="alert alert-error" *ngIf="error">{{ error }}</p>
+
+                <button type="submit" class="btn btn-primary submit" [disabled]="loading || form.invalid">
+                    <span class="shimmer" *ngIf="!loading"></span>
+                    <span class="material-symbols-outlined spin" *ngIf="loading">sync</span>
+                    <span class="submit-text">{{ loading ? 'Validando acceso...' : 'Ingresar al parqueadero' }}</span>
+                    <span class="material-symbols-outlined" *ngIf="!loading">sensor_door</span>
+                </button>
+            </form>
+
+            <footer class="auth-footer">
+                <p>¿No tienes cuenta? Pídele acceso a un administrador.</p>
+                <span class="support">
+                    <span class="material-symbols-outlined">support_agent</span>
+                    Soporte 24/7
+                </span>
+            </footer>
+        </div>
+    </section>
 </div>

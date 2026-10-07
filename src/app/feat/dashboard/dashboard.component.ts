@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ParkingService } from '../../services/parking.service';
-import { ParkingSlot } from '../../models/parking.model';
+import { OccupancyStreamService } from '../../core/spaces/occupancy-stream.service';
+import { VEHICLE_TYPE_LABELS } from '../../models/parking.model';
 
+/**
+ * Resumen de ocupación en tiempo real (RF-16, RF-17, RF-19, RF-21, RF-22).
+ * Los datos llegan por el stream; no hace falta recargar.
+ */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -11,19 +15,13 @@ import { ParkingSlot } from '../../models/parking.model';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  slots: ParkingSlot[] = [];
-  loading = true;
+  readonly vehicleTypeLabels = VEHICLE_TYPE_LABELS;
 
-  get available() { return this.slots.filter(s => s.status === 'AVAILABLE').length; }
-  get occupied()  { return this.slots.filter(s => s.status === 'OCCUPIED').length; }
-  get reserved()  { return this.slots.filter(s => s.status === 'RESERVED').length; }
-
-  constructor(private parkingService: ParkingService) {}
+  constructor(public stream: OccupancyStreamService) {}
 
   ngOnInit(): void {
-    this.parkingService.getSlots().subscribe({
-      next: slots => { this.slots = slots; this.loading = false; },
-      error: () => { this.loading = false; }
-    });
+    if (!this.stream.occupancy()) {
+      this.stream.refresh();
+    }
   }
 }

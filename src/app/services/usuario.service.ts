@@ -1,45 +1,38 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { USUARIOS_ENDPOINT } from '../constants/api.constants';
+import { USERS_ENDPOINT } from '../constants/api.constants';
 import {
-  ActualizarUsuarioRequest,
-  EstadoUsuario,
-  UsuarioResponse
+  CreateUserRequest,
+  UpdateUserRequest,
+  UpdateUserStatusRequest,
+  UserResponse,
+  UserStatus
 } from '../models/auth.model';
 
+/** Endpoints solo para ADMIN: un OPERATOR recibe 403. */
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
   constructor(private http: HttpClient) {}
 
-  listar(): Observable<UsuarioResponse[]> {
-    return this.http.get<UsuarioResponse[]>(USUARIOS_ENDPOINT);
+  listar(): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>(USERS_ENDPOINT);
   }
 
-  obtener(id: number): Observable<UsuarioResponse> {
-    return this.http.get<UsuarioResponse>(`${USUARIOS_ENDPOINT}/${id}`);
+  obtener(id: number): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`${USERS_ENDPOINT}/${id}`);
   }
 
-  actualizar(
-    id: number,
-    body: ActualizarUsuarioRequest
-  ): Observable<UsuarioResponse> {
-    return this.http.put<UsuarioResponse>(`${USUARIOS_ENDPOINT}/${id}`, body);
+  crear(body: CreateUserRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>(USERS_ENDPOINT, body);
   }
 
-  cambiarEstado(
-    id: number,
-    estado: EstadoUsuario
-  ): Observable<UsuarioResponse> {
-    const params = new HttpParams().set('estado', estado);
-    return this.http.patch<UsuarioResponse>(
-      `${USUARIOS_ENDPOINT}/${id}/estado`,
-      null,
-      { params }
-    );
+  actualizar(id: number, body: UpdateUserRequest): Observable<UserResponse> {
+    return this.http.put<UserResponse>(`${USERS_ENDPOINT}/${id}`, body);
   }
 
-  eliminar(id: number): Observable<void> {
-    return this.http.delete<void>(`${USUARIOS_ENDPOINT}/${id}`);
+  cambiarEstado(id: number, status: UserStatus): Observable<UserResponse> {
+    const body: UpdateUserStatusRequest = { status };
+    return this.http.patch<UserResponse>(`${USERS_ENDPOINT}/${id}/status`, body);
   }
 }
