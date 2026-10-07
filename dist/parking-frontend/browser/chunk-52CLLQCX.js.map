@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/utils/api-error.utils.ts"],
-  "sourcesContent": ["import { HttpErrorResponse } from '@angular/common/http';\nimport { ApiError } from '../models/auth.model';\n\nfunction asApiError(error: unknown): ApiError | null {\n  const body = error instanceof HttpErrorResponse ? error.error : null;\n  return body && typeof body === 'object' ? (body as ApiError) : null;\n}\n\n/** Mensaje para mostrar al usuario, con respaldo si el backend no responde. */\nexport function apiErrorMessage(error: unknown, fallback: string): string {\n  if (error instanceof HttpErrorResponse && error.status === 0) {\n    return 'No se pudo conectar con el servidor.';\n  }\n  return asApiError(error)?.message ?? fallback;\n}\n\n/** Errores por campo para pintar debajo de cada input del formulario. */\nexport function apiFieldErrors(error: unknown): Record<string, string> {\n  return asApiError(error)?.fieldErrors ?? {};\n}\n"],
-  "mappings": ";;;;;AAGA,SAAS,WAAW,OAAc;AAChC,QAAM,OAAO,iBAAiB,oBAAoB,MAAM,QAAQ;AAChE,SAAO,QAAQ,OAAO,SAAS,WAAY,OAAoB;AACjE;AAGM,SAAU,gBAAgB,OAAgB,UAAgB;AAC9D,MAAI,iBAAiB,qBAAqB,MAAM,WAAW,GAAG;AAC5D,WAAO;;AAET,SAAO,WAAW,KAAK,GAAG,WAAW;AACvC;AAGM,SAAU,eAAe,OAAc;AAC3C,SAAO,WAAW,KAAK,GAAG,eAAe,CAAA;AAC3C;",
-  "names": []
-}

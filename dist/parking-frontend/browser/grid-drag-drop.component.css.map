@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/stadalone/grid-drag-drop/grid-drag-drop.component.css"],
-  "sourcesContent": [".grid-container {\r\n  display: grid;\r\n  gap: 4px;\r\n}\r\n.cell {\r\n  min-height: 60px;\r\n  background: rgba(51,65,85,0.4);\r\n  border: 1px dashed #334155;\r\n  border-radius: 6px;\r\n}\r\n.item {\r\n  height: 100%;\r\n  min-height: 58px;\r\n  background: #1e40af;\r\n  border-radius: 5px;\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: center;\r\n  color: #e2e8f0;\r\n  font-size: 0.8rem;\r\n  cursor: grab;\r\n  padding: 4px;\r\n  text-align: center;\r\n}\r\n.item:active { cursor: grabbing; }\r\n"],
-  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,OAAK;AACP;AACA,CAAC;AACC,cAAY;AACZ,cAAY,KAAK,EAAE,EAAC,EAAE,EAAC,EAAE,EAAC;AAC1B,UAAQ,IAAI,OAAO;AACnB,iBAAe;AACjB;AACA,CAAC;AACC,UAAQ;AACR,cAAY;AACZ,cAAY;AACZ,iBAAe;AACf,WAAS;AACT,eAAa;AACb,mBAAiB;AACjB,SAAO;AACP,aAAW;AACX,UAAQ;AACR,WAAS;AACT,cAAY;AACd;AACA,CAdC,IAcI;AAAU,UAAQ;AAAU;",
-  "names": []
-}
