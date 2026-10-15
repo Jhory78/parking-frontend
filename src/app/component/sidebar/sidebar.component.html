@@ -1,12 +1,18 @@
 <aside class="sidebar">
-  <ul>
-    <ng-container *ngFor="let link of links">
-      <li *ngIf="!link.adminOnly || currentUser.hasRole('ADMIN')">
-        <a [routerLink]="link.path" routerLinkActive="active">
-          <span class="material-symbols-outlined icon">{{ link.icon }}</span>
-          <span>{{ link.label }}</span>
-        </a>
-      </li>
-    </ng-container>
-  </ul>
+  <a class="brand" routerLink="/dashboard" aria-label="Ir al dashboard">
+    <img src="assets/logo.png" alt="Parking System" />
+  </a>
+
+  <nav>
+    <ul>
+      <ng-container *ngFor="let link of links">
+        <li *ngIf="!link.adminOnly || currentUser.hasRole('ADMIN')">
+          <a [routerLink]="link.path" routerLinkActive="active">
+            <span class="material-symbols-outlined icon">{{ link.icon }}</span>
+            <span>{{ link.label }}</span>
+          </a>
+        </li>
+      </ng-container>
+    </ul>
+  </nav>
 </aside>

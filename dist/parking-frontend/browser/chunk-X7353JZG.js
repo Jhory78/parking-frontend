@@ -1,0 +1,1 @@
+import{Hb as e}from"./chunk-2W6OPMG3.js";function n(r){let o=r instanceof e?r.error:null;return o&&typeof o=="object"?o:null}function s(r,o){return r instanceof e&&r.status===0?"No se pudo conectar con el servidor.":n(r)?.message??o}function i(r){return n(r)?.fieldErrors??{}}export{s as a,i as b};

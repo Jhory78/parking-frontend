@@ -4,7 +4,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OccupancyStreamService } from '../../core/spaces/occupancy-stream.service';
 import { SpaceService } from '../../services/space.service';
 import {
-  SPACE_STATUS_LABELS,
   SpaceResponse,
   SpaceStatus,
   VEHICLE_TYPE_LABELS,
@@ -12,8 +11,21 @@ import {
 } from '../../models/parking.model';
 import { apiErrorMessage } from '../../utils/api-error.utils';
 
+/** Tiempo que una plaza queda resaltada después de cambiar de estado. */
+const FLASH_MS = 1600;
+
+/** Plazas de un tipo de vehículo, separadas por estado para pintarlas distinto. */
+interface Zone {
+  type: VehicleType;
+  icon: string;
+  range: string;
+  total: number;
+  occupied: SpaceResponse[];
+  available: SpaceResponse[];
+}
+
 /**
- * Mapa de espacios (RF-18) con filtro por tipo (RF-17).
+ * Mapa de espacios (RF-18) agrupado por tipo de vehículo (RF-17).
  * Cada cambio, propio o de otro operario, llega por el stream (RF-16).
  */
 @Component({
@@ -25,14 +37,30 @@ import { apiErrorMessage } from '../../utils/api-error.utils';
 })
 export class ParkingComponent implements OnInit {
   readonly vehicleTypeLabels = VEHICLE_TYPE_LABELS;
-  readonly statusLabels = SPACE_STATUS_LABELS;
   readonly vehicleTypes: VehicleType[] = ['CAR', 'MOTORCYCLE'];
 
   readonly spaces = signal<SpaceResponse[]>([]);
   readonly selectedType = signal<VehicleType | null>(null);
-  readonly visibleSpaces = computed(() => {
-    const type = this.selectedType();
-    return type ? this.spaces().filter(space => space.vehicleType === type) : this.spaces();
+  /** Plazas que acaban de cambiar, para resaltarlas un instante. */
+  readonly flashing = signal<ReadonlySet<number>>(new Set());
+
+  readonly zones = computed<Zone[]>(() => {
+    const selected = this.selectedType();
+    return this.vehicleTypes
+      .filter(type => !selected || type === selected)
+      .map(type => {
+        // El backend ya las entrega ordenadas por código
+        const spaces = this.spaces().filter(space => space.vehicleType === type);
+        return {
+          type,
+          icon: type === 'CAR' ? 'directions_car' : 'two_wheeler',
+          range: spaces.length ? `${spaces[0].code} a ${spaces[spaces.length - 1].code}` : '',
+          total: spaces.length,
+          occupied: spaces.filter(space => space.status === 'OCCUPIED'),
+          available: spaces.filter(space => space.status === 'AVAILABLE')
+        };
+      })
+      .filter(zone => zone.total > 0);
   });
 
   loading = true;
@@ -53,7 +81,10 @@ export class ParkingComponent implements OnInit {
 
     this.stream.spaceChanges$
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(changed => this.replaceSpace(changed));
+      .subscribe(changed => {
+        this.replaceSpace(changed);
+        this.flash(changed.id);
+      });
   }
 
   loadSpaces(): void {
@@ -74,11 +105,6 @@ export class ParkingComponent implements OnInit {
     this.selectedType.set(type);
   }
 
-  availableFor(type: VehicleType): number | null {
-    const availability = this.stream.occupancy()?.byVehicleType.find(item => item.vehicleType === type);
-    return availability ? availability.availableSpaces : null;
-  }
-
   /** Marca el espacio como ocupado o disponible (RF-16). */
   toggleStatus(space: SpaceResponse): void {
     const newStatus: SpaceStatus = space.status === 'AVAILABLE' ? 'OCCUPIED' : 'AVAILABLE';
@@ -92,6 +118,7 @@ export class ParkingComponent implements OnInit {
     this.spaceService.changeStatus(space.id, newStatus).subscribe({
       next: updated => {
         this.replaceSpace(updated);
+        this.flash(updated.id);
         this.updatingSpaceId = null;
       },
       error: err => {
@@ -103,11 +130,18 @@ export class ParkingComponent implements OnInit {
     });
   }
 
-  statusClass(status: SpaceStatus): string {
-    return status.toLowerCase();
-  }
-
   private replaceSpace(changed: SpaceResponse): void {
     this.spaces.update(spaces => spaces.map(space => (space.id === changed.id ? changed : space)));
+  }
+
+  private flash(spaceId: number): void {
+    this.flashing.update(ids => new Set(ids).add(spaceId));
+    setTimeout(() => {
+      this.flashing.update(ids => {
+        const next = new Set(ids);
+        next.delete(spaceId);
+        return next;
+      });
+    }, FLASH_MS);
   }
 }

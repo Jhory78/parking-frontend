@@ -1,43 +1,67 @@
 .sidebar {
-  width: 240px;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 260px;
+  height: 100vh;
   flex-shrink: 0;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1.25rem;
+  overflow-y: auto;
   border-right: 1px solid var(--pk-border);
-  min-height: calc(100vh - 72px);
+  background: var(--pk-surface-soft);
 }
-ul { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
+
+.brand { display: block; padding: 0 .5rem; }
+.brand img { display: block; width: 170px; height: auto; }
+
+ul { list-style: none; display: flex; flex-direction: column; gap: .25rem; }
 
 li a {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: .75rem;
-  padding: .7rem .9rem;
-  border-radius: var(--pk-radius-pill);
-  color: var(--pk-ink-soft);
-  font-size: .9rem;
+  gap: .8rem;
+  padding: .75rem 1rem;
+  border-radius: var(--pk-radius);
+  color: var(--pk-ink-muted);
+  font-size: .92rem;
   font-weight: 600;
   text-decoration: none;
   transition: background .15s ease, color .15s ease;
 }
-li a:hover { background: var(--pk-surface-high); color: var(--pk-ink); }
+li a:hover { color: var(--pk-ink); background: var(--pk-surface); }
 
-li a.active {
-  color: var(--pk-on-primary);
+li a.active { color: var(--pk-ink); background: var(--pk-surface-high); }
+li a.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
   background: var(--pk-primary);
-  box-shadow: var(--pk-glow);
 }
-li a.active .icon { color: var(--pk-on-primary); }
+li a.active .icon { color: var(--pk-primary); }
 
-.icon { color: var(--pk-primary); font-size: 20px; }
+.icon { font-size: 20px; }
 
+/* En pantallas angostas el sidebar pasa a ser una cabecera horizontal */
 @media (max-width: 860px) {
   .sidebar {
+    position: static;
     width: 100%;
-    min-height: 0;
-    padding: .75rem 1rem;
+    height: auto;
+    gap: 1rem;
+    padding: 1rem;
     border-right: 0;
     border-bottom: 1px solid var(--pk-border);
   }
+  .brand { padding: 0; }
+  .brand img { width: 140px; }
   ul { flex-direction: row; overflow-x: auto; }
-  li a { white-space: nowrap; }
+  li a { white-space: nowrap; padding: .6rem .9rem; }
+  li a.active::before { top: auto; bottom: 0; left: 25%; right: 25%; width: auto; height: 3px; border-radius: 3px 3px 0 0; }
 }

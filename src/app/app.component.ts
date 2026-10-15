@@ -23,10 +23,10 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
       <button type="button" (click)="authorizationFeedback.clear()">Cerrar</button>
     </div>
     <ng-container *ngIf="authService.isLoggedIn(); else noLayout">
-      <app-navbar></app-navbar>
       <div class="layout">
         <app-sidebar></app-sidebar>
         <main class="content">
+          <app-navbar></app-navbar>
           <app-occupancy-alert></app-occupancy-alert>
           <router-outlet></router-outlet>
         </main>
@@ -37,11 +37,11 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
     </ng-template>
   `,
   styles: [`
-    .layout { display: flex; align-items: flex-start; }
-    .content { flex: 1; min-width: 0; min-height: calc(100vh - 72px); }
+    .layout { display: flex; align-items: flex-start; min-height: 100vh; }
+    .content { flex: 1; min-width: 0; }
     .permission-message {
       position: fixed;
-      top: 88px;
+      top: 24px;
       right: 24px;
       z-index: 1000;
       display: flex;

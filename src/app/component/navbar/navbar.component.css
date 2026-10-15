@@ -1,51 +1,48 @@
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+/* Barra superior de la columna de contenido: solo usuario y salida. */
+.topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 72px;
-  padding: 0 1.5rem;
-  background: rgba(13, 19, 32, .85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--pk-border);
+  justify-content: flex-end;
+  gap: 1.25rem;
+  padding: 1.5rem 2rem 0;
 }
 
-.logo {
-  height: 34px;
-  width: auto;
-}
-
-.actions { display: flex; align-items: center; gap: .9rem; }
-
-.user-chip {
-  display: flex;
-  align-items: center;
-  gap: .6rem;
-  padding: .3rem .9rem .3rem .3rem;
-  border: 1px solid var(--pk-border);
-  border-radius: var(--pk-radius-pill);
-  background: var(--pk-surface);
-}
+.user-chip { display: flex; align-items: center; gap: .75rem; }
 .avatar {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--pk-border-strong);
   border-radius: 50%;
-  background: var(--pk-primary-soft);
+  background: var(--pk-surface);
   color: var(--pk-primary);
-  font-size: .85rem;
+  font-size: .95rem;
   font-weight: 700;
 }
-.user-text { display: flex; flex-direction: column; line-height: 1.15; }
-.user-name { font-size: .82rem; font-weight: 600; }
-.user-role { color: var(--pk-ink-muted); font-size: .7rem; }
+.user-text { display: flex; flex-direction: column; line-height: 1.2; }
+.user-name { font-size: .9rem; font-weight: 700; }
+.user-role { color: var(--pk-ink-muted); font-size: .78rem; }
 
-.btn .material-symbols-outlined { font-size: 16px; }
+.logout {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .45rem .6rem;
+  border: 0;
+  border-radius: var(--pk-radius-sm);
+  color: var(--pk-ink-muted);
+  background: transparent;
+  font-family: inherit;
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .15s ease, background .15s ease;
+}
+.logout:hover { color: var(--pk-danger); background: var(--pk-danger-soft); }
+.logout .material-symbols-outlined { font-size: 18px; }
 
 @media (max-width: 640px) {
-  .navbar { padding: 0 1rem; }
+  .topbar { padding: 1rem 1rem 0; }
   .user-text { display: none; }
 }

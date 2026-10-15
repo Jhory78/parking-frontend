@@ -1,51 +1,105 @@
 <div class="parking-page">
-  <h2>Estacionamiento</h2>
+  <header class="page-head">
+    <h2>Estacionamiento</h2>
+    <span class="live" [class.offline]="!stream.connected()">
+      <span class="live-dot"></span>
+      {{ stream.connected() ? 'En vivo' : 'Reconectando...' }}
+    </span>
+  </header>
 
-  <div class="filters" role="group" aria-label="Filtrar por tipo de vehículo">
-    <button type="button" class="chip" [class.active]="selectedType() === null" (click)="selectType(null)">
-      Todos
-      <span class="chip-count" *ngIf="stream.occupancy() as occupancy">{{ occupancy.availableSpaces }} libres</span>
-    </button>
-    <button
-      type="button"
-      class="chip"
-      *ngFor="let type of vehicleTypes"
-      [class.active]="selectedType() === type"
-      (click)="selectType(type)"
-    >
-      {{ vehicleTypeLabels[type] }}
-      <span class="chip-count" *ngIf="availableFor(type) as available; else noneFree">{{ available }} libres</span>
-      <ng-template #noneFree>
-        <span class="chip-count none" *ngIf="availableFor(type) === 0">sin espacios</span>
-      </ng-template>
-    </button>
-  </div>
+  <!-- Resumen de ocupación + filtro por tipo -->
+  <section class="summary">
+    <div class="summary-stats" *ngIf="stream.occupancy() as occupancy">
+      <span class="pct" [ngClass]="occupancy.level | lowercase">
+        {{ occupancy.occupancyPercentage }}% ocupado
+      </span>
+      <div class="meter" role="progressbar" aria-label="Ocupación total"
+           [attr.aria-valuenow]="occupancy.occupancyPercentage" aria-valuemin="0" aria-valuemax="100">
+        <div class="meter-fill" [ngClass]="occupancy.level | lowercase"
+             [style.width.%]="occupancy.occupancyPercentage"></div>
+      </div>
+      <span class="count">Ocupados <strong>{{ occupancy.occupiedSpaces }}</strong></span>
+      <span class="count">Libres <strong>{{ occupancy.availableSpaces }}</strong></span>
+      <span class="blocked" *ngIf="occupancy.entryBlocked">
+        <span class="material-symbols-outlined">block</span>
+        Barrera bloqueada
+      </span>
+    </div>
 
-  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+    <div class="segmented" role="group" aria-label="Filtrar por tipo de vehículo">
+      <button type="button" [class.active]="selectedType() === null" (click)="selectType(null)">Todos</button>
+      <button
+        type="button"
+        *ngFor="let type of vehicleTypes"
+        [class.active]="selectedType() === type"
+        (click)="selectType(type)"
+      >
+        {{ vehicleTypeLabels[type] }}
+      </button>
+    </div>
+  </section>
 
+  <p *ngIf="error" class="alert alert-error">{{ error }}</p>
   <p *ngIf="loading" class="loading">Cargando espacios...</p>
 
-  <div class="grid" *ngIf="!loading">
-    <button
-      type="button"
-      *ngFor="let space of visibleSpaces()"
-      class="slot"
-      [ngClass]="statusClass(space.status)"
-      [disabled]="updatingSpaceId === space.id"
-      (click)="toggleStatus(space)"
-      [attr.aria-label]="space.code + ': ' + statusLabels[space.status]"
-    >
-      <span class="material-symbols-outlined type-icon">
-        {{ space.vehicleType === 'CAR' ? 'directions_car' : 'two_wheeler' }}
+  <!-- Una zona por tipo de vehículo -->
+  <section class="zone" *ngFor="let zone of zones()">
+    <header class="zone-head">
+      <span class="material-symbols-outlined zone-icon">{{ zone.icon }}</span>
+      <h3>{{ vehicleTypeLabels[zone.type] }}</h3>
+      <span class="muted">{{ zone.range }}</span>
+      <span class="muted" [class.none]="!zone.available.length">
+        {{ zone.available.length }} de {{ zone.total }} libres
       </span>
-      <span class="code">{{ space.code }}</span>
-      <span class="status-label">{{ statusLabels[space.status] }}</span>
-    </button>
-  </div>
+    </header>
 
-  <div class="legend">
-    <span><span class="dot available"></span> Disponible</span>
-    <span><span class="dot occupied"></span> Ocupado</span>
-    <span class="hint-text">Haz clic en un espacio para cambiar su estado.</span>
-  </div>
+    <!-- Ocupadas: tarjetas con acción explícita -->
+    <div class="occupied-grid" *ngIf="zone.occupied.length">
+      <article
+        class="occupied-card"
+        *ngFor="let space of zone.occupied"
+        [class.flash]="flashing().has(space.id)"
+      >
+        <div class="card-top">
+          <span class="code">{{ space.code }}</span>
+          <span class="status">Ocupado</span>
+        </div>
+        <span class="material-symbols-outlined card-icon">{{ zone.icon }}</span>
+        <button
+          type="button"
+          class="btn btn-outlined btn-sm release"
+          [disabled]="updatingSpaceId === space.id"
+          (click)="toggleStatus(space)"
+        >
+          <span class="material-symbols-outlined">logout</span>
+          {{ updatingSpaceId === space.id ? 'Liberando...' : 'Liberar' }}
+        </button>
+      </article>
+    </div>
+
+    <!-- Libres: chips compactos; al hacer clic se ocupan -->
+    <p class="free-label" *ngIf="zone.available.length">Libres · clic para ocupar</p>
+    <div class="free-grid" *ngIf="zone.available.length; else zoneFull">
+      <button
+        type="button"
+        class="free-chip"
+        *ngFor="let space of zone.available"
+        [class.flash]="flashing().has(space.id)"
+        [disabled]="updatingSpaceId === space.id"
+        [attr.aria-label]="'Ocupar ' + space.code"
+        (click)="toggleStatus(space)"
+      >
+        <span>{{ space.code }}</span>
+        <span class="material-symbols-outlined add">add</span>
+      </button>
+    </div>
+    <ng-template #zoneFull>
+      <p class="zone-full">
+        <span class="material-symbols-outlined">block</span>
+        Sin plazas libres para {{ vehicleTypeLabels[zone.type] | lowercase }}
+      </p>
+    </ng-template>
+  </section>
+
+  <p class="loading" *ngIf="!loading && !zones().length && !error">No hay espacios registrados.</p>
 </div>

@@ -1,17 +1,13 @@
-<nav class="navbar">
-  <img class="logo" src="assets/logo.png" alt="Parking System" />
-
-  <div class="actions" *ngIf="currentUser.user() as user">
-    <span class="user-chip">
-      <span class="avatar">{{ initial }}</span>
-      <span class="user-text">
-        <span class="user-name">{{ user.name || user.email }}</span>
-        <span class="user-role" *ngIf="user.role">{{ roleLabels[user.role] }}</span>
-      </span>
+<nav class="topbar" *ngIf="currentUser.user() as user">
+  <span class="user-chip">
+    <span class="avatar">{{ initial }}</span>
+    <span class="user-text">
+      <span class="user-name">{{ user.name || user.email }}</span>
+      <span class="user-role" *ngIf="user.role">{{ roleLabels[user.role] }}</span>
     </span>
-    <button (click)="logout()" class="btn btn-outlined btn-sm">
-      <span class="material-symbols-outlined">logout</span>
-      Salir
-    </button>
-  </div>
+  </span>
+  <button (click)="logout()" class="logout">
+    <span class="material-symbols-outlined">logout</span>
+    Salir
+  </button>
 </nav>
