@@ -19,6 +19,10 @@ export interface SpaceResponse {
   code: string;
   vehicleType: VehicleType;
   status: SpaceStatus;
+  /** Placa del vehículo registrado; null si está libre o se ocupó a mano. */
+  currentPlate: string | null;
+  /** Hora de ingreso (ISO-8601 UTC) de ese vehículo; null en los mismos casos. */
+  occupiedSince: string | null;
 }
 
 /** GET /spaces/availability (RF-17) */

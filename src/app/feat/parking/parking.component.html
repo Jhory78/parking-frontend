@@ -64,15 +64,26 @@
           <span class="code">{{ space.code }}</span>
           <span class="status">Ocupado</span>
         </div>
+        <!-- Vehículo registrado por placa (Sprint 3); las ocupadas a mano no tienen placa -->
+        <div class="vehicle" *ngIf="space.currentPlate; else manualOccupation">
+          <span class="plate">{{ formatPlate(space.currentPlate) }}</span>
+          <span class="since" *ngIf="space.occupiedSince">desde {{ space.occupiedSince | date: 'HH:mm' }}</span>
+        </div>
+        <ng-template #manualOccupation>
+          <span class="since">Ocupada a mano</span>
+        </ng-template>
         <span class="material-symbols-outlined card-icon">{{ zone.icon }}</span>
         <button
           type="button"
           class="btn btn-outlined btn-sm release"
           [disabled]="updatingSpaceId === space.id"
-          (click)="toggleStatus(space)"
+          (click)="space.currentPlate ? registerExit(space) : toggleStatus(space)"
         >
           <span class="material-symbols-outlined">logout</span>
-          {{ updatingSpaceId === space.id ? 'Liberando...' : 'Liberar' }}
+          <ng-container *ngIf="updatingSpaceId === space.id; else releaseLabel">
+            {{ space.currentPlate ? 'Registrando...' : 'Liberando...' }}
+          </ng-container>
+          <ng-template #releaseLabel>{{ space.currentPlate ? 'Registrar salida' : 'Liberar' }}</ng-template>
         </button>
       </article>
     </div>

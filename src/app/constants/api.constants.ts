@@ -16,3 +16,10 @@ export const SPACES_ENDPOINTS = {
   occupancy:    `${API_BASE}/spaces/occupancy`,
   stream:       `${API_BASE}/spaces/stream`,
 };
+
+export const ENTRIES_ENDPOINTS = {
+  entries:   `${API_BASE}/entries`,
+  recognize: `${API_BASE}/entries/recognize`,
+  exit:      `${API_BASE}/entries/exit`,
+  active:    `${API_BASE}/entries/active`,
+};

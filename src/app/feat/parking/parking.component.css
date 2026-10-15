@@ -142,6 +142,16 @@ h2 { font-size: 2rem; font-weight: 800; }
   font-size: 96px;
   pointer-events: none;
 }
+.vehicle { position: relative; display: flex; align-items: baseline; flex-wrap: wrap; gap: .3rem .6rem; }
+.plate {
+  padding: .15rem .55rem;
+  border: 1px solid var(--pk-border-strong);
+  border-radius: 6px;
+  background: var(--pk-surface-highest);
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.since { position: relative; color: var(--pk-ink-muted); font-size: .8rem; }
 .release { position: relative; align-self: flex-start; }
 .release .material-symbols-outlined { font-size: 16px; }
 

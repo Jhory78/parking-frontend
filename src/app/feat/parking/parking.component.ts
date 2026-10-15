@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OccupancyStreamService } from '../../core/spaces/occupancy-stream.service';
+import { EntryService } from '../../services/entry.service';
 import { SpaceService } from '../../services/space.service';
 import {
   SpaceResponse,
@@ -10,6 +11,7 @@ import {
   VehicleType
 } from '../../models/parking.model';
 import { apiErrorMessage } from '../../utils/api-error.utils';
+import { formatPlate } from '../../utils/plate.utils';
 
 /** Tiempo que una plaza queda resaltada después de cambiar de estado. */
 const FLASH_MS = 1600;
@@ -67,8 +69,11 @@ export class ParkingComponent implements OnInit {
   updatingSpaceId: number | null = null;
   error = '';
 
+  readonly formatPlate = formatPlate;
+
   constructor(
     private spaceService: SpaceService,
+    private entryService: EntryService,
     public stream: OccupancyStreamService,
     private destroyRef: DestroyRef
   ) {}
@@ -124,6 +129,29 @@ export class ParkingComponent implements OnInit {
       error: err => {
         // 409: otro operario lo cambió antes; se recarga para ver el estado real
         this.error = apiErrorMessage(err, `No se pudo ${action} el espacio`);
+        this.updatingSpaceId = null;
+        this.loadSpaces();
+      }
+    });
+  }
+
+  /**
+   * Plaza con vehículo registrado por placa: se libera con su salida, no con el
+   * PATCH manual (el backend respondería 409).
+   */
+  registerExit(space: SpaceResponse): void {
+    const plate = space.currentPlate;
+    if (!plate || !confirm(`¿Registrar la salida de ${formatPlate(plate)} (plaza ${space.code})?`)) {
+      return;
+    }
+
+    this.error = '';
+    this.updatingSpaceId = space.id;
+    // La plaza liberada llega por el stream
+    this.entryService.registerExit(plate).subscribe({
+      next: () => (this.updatingSpaceId = null),
+      error: err => {
+        this.error = apiErrorMessage(err, 'No se pudo registrar la salida');
         this.updatingSpaceId = null;
         this.loadSpaces();
       }

@@ -26,6 +26,11 @@ export const routes: Routes = [
     loadComponent: () => import('./feat/parking/parking.component').then(m => m.ParkingComponent)
   },
   {
+    path: 'ingresos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./feat/ingresos/ingresos.component').then(m => m.IngresosComponent)
+  },
+  {
     path: 'usuarios',
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ADMIN'] },

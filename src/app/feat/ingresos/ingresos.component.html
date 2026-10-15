@@ -1,0 +1,229 @@
+<div class="ingresos-page">
+  <header class="page-head">
+    <h2>Ingresos y salidas</h2>
+    <span class="live" [class.offline]="!stream.connected()">
+      <span class="live-dot"></span>
+      {{ stream.connected() ? 'En vivo' : 'Reconectando...' }}
+    </span>
+
+    <div class="availability" *ngIf="stream.occupancy() as occupancy">
+      <span class="chip" *ngFor="let type of vehicleTypes" [class.none]="availableByType().get(type) === 0">
+        <span class="material-symbols-outlined">{{ type === 'CAR' ? 'directions_car' : 'two_wheeler' }}</span>
+        {{ availableByType().get(type) ?? '–' }} libres
+      </span>
+      <span class="chip none" *ngIf="occupancy.entryBlocked">
+        <span class="material-symbols-outlined">block</span>
+        Barrera bloqueada
+      </span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- ── Registrar ingreso ─────────────────────────────── -->
+    <section class="panel">
+      <header class="panel-head">
+        <span class="material-symbols-outlined panel-icon">login</span>
+        <h3>Registrar ingreso</h3>
+      </header>
+
+      <div class="result success" *ngIf="lastEntry" role="status">
+        <span class="material-symbols-outlined">check_circle</span>
+        <div>
+          <strong class="plate-tag">{{ formatPlate(lastEntry.plate) }}</strong>
+          ingresó a las {{ lastEntry.entryTime | date: 'HH:mm' }}
+          <div class="assigned">Plaza asignada <strong>{{ lastEntry.space.code }}</strong></div>
+        </div>
+      </div>
+
+      <p class="alert alert-error" *ngIf="entryError" role="alert">{{ entryError }}</p>
+
+      <!-- Paso 1: foto (RF-01) -->
+      <div class="capture" *ngIf="step === 'capture'">
+        <p class="help">Toma o sube una foto de la placa. El sistema la lee y tú la confirmas.</p>
+        <div class="capture-actions">
+          <label class="btn btn-primary">
+            <span class="material-symbols-outlined">photo_camera</span>
+            Tomar foto
+            <input type="file" accept="image/jpeg,image/png" capture="environment" hidden
+                   (change)="onPhotoSelected($event)" />
+          </label>
+          <label class="btn btn-outlined">
+            <span class="material-symbols-outlined">upload</span>
+            Subir imagen
+            <input type="file" accept="image/jpeg,image/png" hidden (change)="onPhotoSelected($event)" />
+          </label>
+        </div>
+        <button type="button" class="link" (click)="startManualEntry()">
+          Escribir la placa a mano
+        </button>
+      </div>
+
+      <!-- Paso 2: leyendo (RF-02) -->
+      <div class="recognizing" *ngIf="step === 'recognizing'">
+        <img *ngIf="previewUrl" [src]="previewUrl" alt="Foto de la placa" class="preview" />
+        <p class="help"><span class="spinner"></span> Leyendo la placa...</p>
+      </div>
+
+      <!-- Paso 3: confirmar o corregir (RF-03, RF-04, RF-11) -->
+      <form *ngIf="step === 'confirm'" [formGroup]="entryForm" (ngSubmit)="confirmEntry()" class="confirm">
+        <img *ngIf="previewUrl" [src]="previewUrl" alt="Foto de la placa" class="preview" />
+
+        <p class="notice" *ngIf="manualNotice">
+          <span class="material-symbols-outlined">edit_note</span>
+          {{ manualNotice }}
+        </p>
+
+        <ng-container *ngIf="recognition && !plateEdited">
+          <p class="notice warn" *ngIf="recognition.alreadyInside">
+            <span class="material-symbols-outlined">warning</span>
+            <span>
+              Este vehículo ya está dentro.
+              <button type="button" class="link" (click)="exitRecognizedVehicle(recognition.plate)">
+                Registrar su salida
+              </button>
+            </span>
+          </p>
+          <p class="notice warn" *ngIf="recognition.lowConfidence">
+            <span class="material-symbols-outlined">visibility</span>
+            Lectura poco confiable ({{ recognition.confidence | percent: '1.0-0' }}): revisa la placa.
+          </p>
+        </ng-container>
+
+        <div class="form-group">
+          <label class="form-label" for="entry-plate">Placa</label>
+          <input id="entry-plate" type="text" formControlName="plate" class="form-control plate-input"
+                 autocomplete="off" autocapitalize="characters" placeholder="ABC-123"
+                 [class.invalid]="entryFieldErrors['plate'] || (entryForm.controls.plate.invalid && entryForm.controls.plate.touched)" />
+          <span class="hint" *ngIf="entryForm.controls.plate.hasError('required') && entryForm.controls.plate.touched">
+            La placa es obligatoria
+          </span>
+          <span class="hint" *ngIf="entryForm.controls.plate.hasError('plate')">
+            La placa debe tener entre 4 y 8 letras o números
+          </span>
+          <span class="hint" *ngIf="entryFieldErrors['plate']">{{ entryFieldErrors['plate'] }}</span>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Tipo de vehículo</span>
+          <div class="segmented" role="group" aria-label="Tipo de vehículo">
+            <button type="button" [class.active]="entryForm.controls.vehicleType.value === null"
+                    [disabled]="!inferredType" (click)="selectVehicleType(null)">
+              {{ inferredType ? 'Automático: ' + singularLabels[inferredType] : 'Automático' }}
+            </button>
+            <button type="button" *ngFor="let type of vehicleTypes"
+                    [class.active]="entryForm.controls.vehicleType.value === type"
+                    (click)="selectVehicleType(type)">
+              {{ singularLabels[type] }}
+            </button>
+          </div>
+          <span class="hint neutral" *ngIf="!inferredType && entryForm.controls.plate.value && !entryForm.controls.vehicleType.value">
+            La placa no tiene formato colombiano: elige el tipo.
+          </span>
+          <span class="hint" *ngIf="entryFieldErrors['vehicleType']">{{ entryFieldErrors['vehicleType'] }}</span>
+        </div>
+
+        <p class="notice danger" *ngIf="noSpaceWarning">
+          <span class="material-symbols-outlined">block</span>
+          {{ noSpaceWarning }}
+        </p>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outlined" (click)="cancelEntry()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="savingEntry">
+            {{ savingEntry ? 'Registrando...' : 'Confirmar ingreso' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ── Registrar salida ──────────────────────────────── -->
+    <section class="panel">
+      <header class="panel-head">
+        <span class="material-symbols-outlined panel-icon exit">logout</span>
+        <h3>Registrar salida</h3>
+      </header>
+
+      <div class="result exit" *ngIf="lastExit" role="status">
+        <span class="material-symbols-outlined">directions_car</span>
+        <div>
+          <strong class="plate-tag">{{ formatPlate(lastExit.plate) }}</strong>
+          salió de la plaza {{ lastExit.space.code }}
+          <div class="assigned">
+            Tiempo dentro <strong>{{ formatMinutes(lastExit.durationMinutes) }}</strong>
+            · {{ lastExit.entryTime | date: 'HH:mm' }} a {{ lastExit.exitTime | date: 'HH:mm' }}
+          </div>
+        </div>
+      </div>
+
+      <p class="alert alert-error" *ngIf="exitError" role="alert">{{ exitError }}</p>
+
+      <form [formGroup]="exitForm" (ngSubmit)="submitExit()">
+        <div class="form-group">
+          <label class="form-label" for="exit-plate">Placa</label>
+          <input id="exit-plate" type="text" formControlName="plate" class="form-control plate-input"
+                 autocomplete="off" autocapitalize="characters" placeholder="ABC-123" />
+          <span class="hint" *ngIf="exitForm.controls.plate.hasError('required') && exitForm.controls.plate.touched">
+            La placa es obligatoria
+          </span>
+          <span class="hint" *ngIf="exitForm.controls.plate.hasError('plate')">
+            La placa debe tener entre 4 y 8 letras o números
+          </span>
+        </div>
+        <button type="submit" class="btn btn-secondary full" [disabled]="exitingPlate !== null">
+          {{ exitingPlate ? 'Registrando...' : 'Registrar salida' }}
+        </button>
+      </form>
+      <p class="help small">También puedes registrar la salida desde la lista de vehículos dentro.</p>
+    </section>
+  </div>
+
+  <!-- ── Vehículos dentro (RF-10) ────────────────────────────── -->
+  <section class="table-card">
+    <header class="table-head">
+      <h3>Vehículos dentro</h3>
+      <span class="count-pill">{{ activeEntries().length }}</span>
+    </header>
+
+    <p class="alert alert-error" *ngIf="activeError">{{ activeError }}</p>
+    <p class="loading" *ngIf="loadingActive()">Cargando...</p>
+
+    <div class="table-scroll" *ngIf="!loadingActive()">
+      <table class="entries-table">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Tipo</th>
+            <th>Plaza</th>
+            <th>Ingreso</th>
+            <th>Tiempo</th>
+            <th class="right">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let entry of activeEntries(); trackBy: trackById">
+            <td><span class="plate-tag">{{ formatPlate(entry.plate) }}</span></td>
+            <td>
+              <span class="type">
+                <span class="material-symbols-outlined">{{ entry.vehicleType === 'CAR' ? 'directions_car' : 'two_wheeler' }}</span>
+                {{ singularLabels[entry.vehicleType] }}
+              </span>
+            </td>
+            <td class="space">{{ entry.space.code }}</td>
+            <td>{{ entry.entryTime | date: 'dd/MM HH:mm' }}</td>
+            <td class="muted">{{ stayOf(entry) }}</td>
+            <td class="right">
+              <button type="button" class="btn btn-outlined btn-sm"
+                      [disabled]="exitingPlate === entry.plate" (click)="exitFromList(entry)">
+                <span class="material-symbols-outlined">logout</span>
+                {{ exitingPlate === entry.plate ? 'Registrando...' : 'Salida' }}
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="!activeEntries().length">
+            <td colspan="6" class="empty">No hay vehículos dentro.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

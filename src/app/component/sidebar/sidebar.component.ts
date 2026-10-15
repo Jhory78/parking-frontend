@@ -15,6 +15,7 @@ export class SidebarComponent {
   // Solo las pantallas que existen hoy. El icono es un Material Symbol.
   links = [
     { path: '/dashboard', label: 'Dashboard',       icon: 'space_dashboard', adminOnly: false },
+    { path: '/ingresos',  label: 'Ingresos',        icon: 'garage',          adminOnly: false },
     { path: '/parking',   label: 'Estacionamiento', icon: 'local_parking',   adminOnly: false },
     { path: '/usuarios',  label: 'Operarios',       icon: 'badge',           adminOnly: true },
   ];
