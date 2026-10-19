@@ -1,1 +1,21 @@
-node_modules
+# Dependencias
+node_modules/
+
+# Build
+dist/
+
+# Angular cache
+.angular/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Variables de entorno locales
+.env
+.env.local

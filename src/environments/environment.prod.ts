@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:9200/pk/api'
+  apiUrl: 'https://backend-parking-x90a.onrender.com/pk/api'
 };
