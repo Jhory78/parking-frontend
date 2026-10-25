@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, interval } from 'rxjs';
 import { OccupancyStreamService } from '../../core/spaces/occupancy-stream.service';
+import { ConfirmDialogService } from '../../core/feedback/confirm-dialog.service';
 import { EntryService } from '../../services/entry.service';
 import { EntryResponse, PlateRecognitionResponse, VEHICLE_TYPE_SINGULAR_LABELS } from '../../models/entry.model';
 import { VEHICLE_TYPE_LABELS, VehicleType } from '../../models/parking.model';
@@ -84,6 +85,7 @@ export class IngresosComponent implements OnInit, OnDestroy {
   constructor(
     private entryService: EntryService,
     public stream: OccupancyStreamService,
+    private confirmDialog: ConfirmDialogService,
     private fb: FormBuilder,
     private destroyRef: DestroyRef
   ) {}
@@ -323,19 +325,28 @@ export class IngresosComponent implements OnInit, OnDestroy {
   }
 
   /** Salida desde la lista de vehículos dentro o desde el aviso "ya está dentro". */
-  exitFromList(entry: EntryResponse): void {
-    if (!confirm(`¿Registrar la salida de ${formatPlate(entry.plate)} (plaza ${entry.space.code})?`)) {
+  async exitFromList(entry: EntryResponse): Promise<void> {
+    if (!(await this.confirmExit(`¿Registrar la salida de ${formatPlate(entry.plate)} de la plaza ${entry.space.code}?`))) {
       return;
     }
     this.registerExit(entry.plate);
   }
 
-  exitRecognizedVehicle(plate: string): void {
-    if (!confirm(`¿Registrar la salida de ${formatPlate(plate)}?`)) {
+  async exitRecognizedVehicle(plate: string): Promise<void> {
+    if (!(await this.confirmExit(`¿Registrar la salida de ${formatPlate(plate)}?`))) {
       return;
     }
     this.cancelEntry();
     this.registerExit(plate);
+  }
+
+  private confirmExit(message: string): Promise<boolean> {
+    return this.confirmDialog.confirm({
+      title: 'Registrar salida',
+      message,
+      confirmText: 'Registrar salida',
+      icon: 'logout'
+    });
   }
 
   private registerExit(plate: string): void {

@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { SidebarComponent } from './component/sidebar/sidebar.component';
 import { OccupancyAlertComponent } from './component/occupancy-alert/occupancy-alert.component';
+import { ConfirmDialogComponent } from './component/confirm-dialog/confirm-dialog.component';
 import { AuthService } from './services/auth.service';
 import { AuthorizationFeedbackService } from './core/security/authorization-feedback.service';
 import { CurrentUserService } from './core/users/current-user.service';
@@ -12,7 +13,7 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent, OccupancyAlertComponent],
+  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent, OccupancyAlertComponent, ConfirmDialogComponent],
   template: `
     <div
       class="permission-message"
@@ -35,6 +36,7 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
     <ng-template #noLayout>
       <router-outlet></router-outlet>
     </ng-template>
+    <app-confirm-dialog></app-confirm-dialog>
   `,
   styles: [`
     .layout { display: flex; align-items: flex-start; min-height: 100vh; }

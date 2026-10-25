@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CurrentUserService } from '../../core/users/current-user.service';
+import { ConfirmDialogService } from '../../core/feedback/confirm-dialog.service';
 import { UsuarioService } from '../../services/usuario.service';
 import {
   CreateUserRequest,
@@ -53,6 +54,7 @@ export class UsuariosComponent implements OnInit {
   constructor(
     private usuarioService: UsuarioService,
     private currentUser: CurrentUserService,
+    private confirmDialog: ConfirmDialogService,
     private fb: FormBuilder
   ) {}
 
@@ -149,9 +151,19 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  cambiarEstado(user: UserResponse, nuevoEstado: UserStatus): void {
-    const accion = nuevoEstado === 'ACTIVE' ? 'activar' : 'desactivar';
-    if (!confirm(`¿Seguro que quieres ${accion} a ${user.name}?`)) {
+  async cambiarEstado(user: UserResponse, nuevoEstado: UserStatus): Promise<void> {
+    const activando = nuevoEstado === 'ACTIVE';
+    const accion = activando ? 'activar' : 'desactivar';
+    const aceptado = await this.confirmDialog.confirm({
+      title: activando ? `Activar a ${user.name}` : `Desactivar a ${user.name}`,
+      message: activando
+        ? 'Podrá volver a iniciar sesión en el sistema.'
+        : 'No podrá iniciar sesión, pero su historial de operaciones se conserva.',
+      confirmText: activando ? 'Activar' : 'Desactivar',
+      tone: activando ? 'primary' : 'danger',
+      icon: activando ? 'person_check' : 'person_off'
+    });
+    if (!aceptado) {
       return;
     }
 

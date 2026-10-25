@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OccupancyStreamService } from '../../core/spaces/occupancy-stream.service';
+import { ConfirmDialogService } from '../../core/feedback/confirm-dialog.service';
 import { EntryService } from '../../services/entry.service';
 import { SpaceService } from '../../services/space.service';
 import {
@@ -75,6 +76,7 @@ export class ParkingComponent implements OnInit {
     private spaceService: SpaceService,
     private entryService: EntryService,
     public stream: OccupancyStreamService,
+    private confirmDialog: ConfirmDialogService,
     private destroyRef: DestroyRef
   ) {}
 
@@ -111,10 +113,19 @@ export class ParkingComponent implements OnInit {
   }
 
   /** Marca el espacio como ocupado o disponible (RF-16). */
-  toggleStatus(space: SpaceResponse): void {
+  async toggleStatus(space: SpaceResponse): Promise<void> {
     const newStatus: SpaceStatus = space.status === 'AVAILABLE' ? 'OCCUPIED' : 'AVAILABLE';
-    const action = newStatus === 'OCCUPIED' ? 'marcar como ocupado' : 'liberar';
-    if (!confirm(`¿Seguro que quieres ${action} el espacio ${space.code}?`)) {
+    const occupying = newStatus === 'OCCUPIED';
+    const action = occupying ? 'marcar como ocupado' : 'liberar';
+    const accepted = await this.confirmDialog.confirm({
+      title: occupying ? `Ocupar el espacio ${space.code}` : `Liberar el espacio ${space.code}`,
+      message: occupying
+        ? 'El espacio quedará marcado como ocupado y no se asignará a nuevos ingresos.'
+        : 'El espacio quedará disponible para nuevos ingresos.',
+      confirmText: occupying ? 'Marcar como ocupado' : 'Liberar espacio',
+      icon: occupying ? 'local_parking' : 'lock_open'
+    });
+    if (!accepted) {
       return;
     }
 
@@ -139,9 +150,18 @@ export class ParkingComponent implements OnInit {
    * Plaza con vehículo registrado por placa: se libera con su salida, no con el
    * PATCH manual (el backend respondería 409).
    */
-  registerExit(space: SpaceResponse): void {
+  async registerExit(space: SpaceResponse): Promise<void> {
     const plate = space.currentPlate;
-    if (!plate || !confirm(`¿Registrar la salida de ${formatPlate(plate)} (plaza ${space.code})?`)) {
+    if (!plate) {
+      return;
+    }
+    const accepted = await this.confirmDialog.confirm({
+      title: 'Registrar salida',
+      message: `¿Registrar la salida de ${formatPlate(plate)} de la plaza ${space.code}?`,
+      confirmText: 'Registrar salida',
+      icon: 'logout'
+    });
+    if (!accepted) {
       return;
     }
 
