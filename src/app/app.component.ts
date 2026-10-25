@@ -1,11 +1,12 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { NavbarComponent } from './component/navbar/navbar.component';
 import { SidebarComponent } from './component/sidebar/sidebar.component';
 import { OccupancyAlertComponent } from './component/occupancy-alert/occupancy-alert.component';
 import { ConfirmDialogComponent } from './component/confirm-dialog/confirm-dialog.component';
-import { AuthService } from './services/auth.service';
 import { AuthorizationFeedbackService } from './core/security/authorization-feedback.service';
 import { CurrentUserService } from './core/users/current-user.service';
 import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
@@ -23,19 +24,16 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
       <span>{{ message }}</span>
       <button type="button" (click)="authorizationFeedback.clear()">Cerrar</button>
     </div>
-    <ng-container *ngIf="authService.isLoggedIn(); else noLayout">
-      <div class="layout">
-        <app-sidebar></app-sidebar>
-        <main class="content">
+    <div class="layout">
+      <app-sidebar *ngIf="showLayout()"></app-sidebar>
+      <main class="content">
+        <ng-container *ngIf="showLayout()">
           <app-navbar></app-navbar>
           <app-occupancy-alert></app-occupancy-alert>
-          <router-outlet></router-outlet>
-        </main>
-      </div>
-    </ng-container>
-    <ng-template #noLayout>
-      <router-outlet></router-outlet>
-    </ng-template>
+        </ng-container>
+        <router-outlet></router-outlet>
+      </main>
+    </div>
     <app-confirm-dialog></app-confirm-dialog>
   `,
   styles: [`
@@ -74,8 +72,16 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
   `]
 })
 export class AppComponent {
+  // Por ruta y no por token: el token cambia antes de que termine la navegación.
+  readonly showLayout = toSignal(
+    inject(Router).events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(event => !event.urlAfterRedirects.startsWith('/auth'))
+    ),
+    { initialValue: false }
+  );
+
   constructor(
-    public authService: AuthService,
     public authorizationFeedback: AuthorizationFeedbackService,
     currentUser: CurrentUserService,
     occupancyStream: OccupancyStreamService
