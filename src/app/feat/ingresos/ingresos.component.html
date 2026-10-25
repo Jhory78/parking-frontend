@@ -41,12 +41,10 @@
       <div class="capture" *ngIf="step === 'capture'">
         <p class="help">Toma o sube una foto de la placa. El sistema la lee y tú la confirmas.</p>
         <div class="capture-actions">
-          <label class="btn btn-primary">
+          <button type="button" class="btn btn-primary" (click)="startCamera()">
             <span class="material-symbols-outlined">photo_camera</span>
             Tomar foto
-            <input type="file" accept="image/jpeg,image/png" capture="environment" hidden
-                   (change)="onPhotoSelected($event)" />
-          </label>
+          </button>
           <label class="btn btn-outlined">
             <span class="material-symbols-outlined">upload</span>
             Subir imagen
@@ -56,6 +54,18 @@
         <button type="button" class="link" (click)="startManualEntry()">
           Escribir la placa a mano
         </button>
+      </div>
+
+      <!-- Paso 1b: cámara en vivo (RF-01) -->
+      <div class="camera" *ngIf="step === 'camera'">
+        <video #cameraVideo class="camera-video" autoplay playsinline muted></video>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outlined" (click)="cancelCamera()">Cancelar</button>
+          <button type="button" class="btn btn-primary" (click)="capturePhoto()">
+            <span class="material-symbols-outlined">photo_camera</span>
+            Capturar
+          </button>
+        </div>
       </div>
 
       <!-- Paso 2: leyendo (RF-02) -->
