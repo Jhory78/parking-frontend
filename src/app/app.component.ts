@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { NavbarComponent } from './component/navbar/navbar.component';
 import { SidebarComponent } from './component/sidebar/sidebar.component';
 import { OccupancyAlertComponent } from './component/occupancy-alert/occupancy-alert.component';
 import { ConfirmDialogComponent } from './component/confirm-dialog/confirm-dialog.component';
@@ -14,7 +13,7 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavbarComponent, SidebarComponent, OccupancyAlertComponent, ConfirmDialogComponent],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, OccupancyAlertComponent, ConfirmDialogComponent],
   template: `
     <div
       class="permission-message"
@@ -27,10 +26,7 @@ import { OccupancyStreamService } from './core/spaces/occupancy-stream.service';
     <div class="layout">
       <app-sidebar *ngIf="showLayout()"></app-sidebar>
       <main class="content">
-        <ng-container *ngIf="showLayout()">
-          <app-navbar></app-navbar>
-          <app-occupancy-alert></app-occupancy-alert>
-        </ng-container>
+        <app-occupancy-alert *ngIf="showLayout()"></app-occupancy-alert>
         <router-outlet></router-outlet>
       </main>
     </div>

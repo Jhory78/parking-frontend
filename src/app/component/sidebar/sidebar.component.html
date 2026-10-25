@@ -15,4 +15,15 @@
       </ng-container>
     </ul>
   </nav>
+
+  <div class="user-panel" *ngIf="currentUser.user() as user">
+    <span class="avatar" aria-hidden="true">{{ initial }}</span>
+    <span class="user-text">
+      <span class="user-name" [title]="user.name || user.email">{{ user.name || user.email }}</span>
+      <span class="user-role" *ngIf="user.role">{{ roleLabels[user.role] }}</span>
+    </span>
+    <button type="button" class="logout" (click)="logout()" title="Cerrar sesión" aria-label="Cerrar sesión">
+      <span class="material-symbols-outlined">logout</span>
+    </button>
+  </div>
 </aside>
