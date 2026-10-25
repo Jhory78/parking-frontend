@@ -1,6 +1,12 @@
-.sidebar {
+/* El sticky va en el host: es el hijo directo del layout que hace scroll */
+:host {
   position: sticky;
   top: 0;
+  display: block;
+  flex-shrink: 0;
+}
+
+.sidebar {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -50,8 +56,8 @@ li a.active .icon { color: var(--pk-primary); }
 
 /* En pantallas angostas el sidebar pasa a ser una cabecera horizontal */
 @media (max-width: 860px) {
+  :host { position: static; width: 100%; }
   .sidebar {
-    position: static;
     width: 100%;
     height: auto;
     gap: 1rem;
